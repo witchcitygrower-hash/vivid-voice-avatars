@@ -1,7 +1,10 @@
 import { Canvas } from '@react-three/fiber';
-import { Environment, ContactShadows, Float } from '@react-three/drei';
+import { Environment, ContactShadows } from '@react-three/drei';
+import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-three/postprocessing';
+import { BlendFunction } from 'postprocessing';
 import AvatarHead from './AvatarHead';
 import ParticleField from './ParticleField';
+import WaveformRing from './WaveformRing';
 import type { AudioData } from '@/hooks/useAudioAnalyzer';
 
 interface Props {
@@ -12,56 +15,84 @@ interface Props {
 function AvatarScene({ audioData, isListening }: Props) {
   return (
     <Canvas
-      camera={{ position: [0, 0.3, 3.2], fov: 35 }}
+      camera={{ position: [0, 0.3, 3.2], fov: 32 }}
       dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      style={{ background: 'transparent' }}
+      gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', toneMapping: 3 }}
     >
-      <color attach="background" args={['#080c14']} />
-      <fog attach="fog" args={['#080c14', 5, 15]} />
+      <color attach="background" args={['#050810']} />
+      <fog attach="fog" args={['#050810', 4, 12]} />
 
-      {/* Key Light - warm, slightly right */}
-      <directionalLight position={[3, 4, 2]} intensity={1.8} color="#ffe8d6" />
+      {/* Three-point cinematic lighting */}
+      <directionalLight position={[3, 5, 3]} intensity={2.2} color="#ffe4cc" castShadow />
+      <directionalLight position={[-4, 2, 1]} intensity={0.8} color="#6ec8f0" />
       
-      {/* Fill Light - cool, left */}
-      <directionalLight position={[-3, 2, 2]} intensity={0.6} color="#7ec8e3" />
-      
-      {/* Rim Light - strong cyan from behind */}
+      {/* Rim light - strong cyan backlight */}
       <spotLight
-        position={[0, 3, -3]}
-        intensity={isListening ? 3 + audioData.volume * 5 : 2}
-        color="#00d4ff"
-        angle={0.6}
-        penumbra={0.8}
+        position={[0, 4, -4]}
+        intensity={isListening ? 4 + audioData.volume * 8 : 2.5}
+        color="#00ccff"
+        angle={0.5}
+        penumbra={1}
+        castShadow
       />
 
-      {/* Accent light - magenta from below */}
+      {/* Bottom accent - magenta */}
       <pointLight
-        position={[0, -2, 1]}
-        intensity={isListening ? 0.8 + audioData.bass * 2 : 0.4}
-        color="#ff3388"
+        position={[0, -3, 1.5]}
+        intensity={isListening ? 1.2 + audioData.bass * 4 : 0.5}
+        color="#ff2266"
+        distance={8}
+      />
+
+      {/* Side accents */}
+      <pointLight
+        position={[-3, 0, 0]}
+        intensity={isListening ? 0.5 + audioData.mid * 2 : 0.2}
+        color="#4400ff"
+        distance={6}
+      />
+      <pointLight
+        position={[3, 0, 0]}
+        intensity={isListening ? 0.5 + audioData.treble * 2 : 0.2}
+        color="#00ffaa"
         distance={6}
       />
 
-      {/* Ambient fill */}
-      <ambientLight intensity={0.15} color="#1a1a2e" />
+      <ambientLight intensity={0.08} color="#0a0a1a" />
 
-      <Float speed={0.8} rotationIntensity={0.05} floatIntensity={0.1}>
-        <AvatarHead audioData={audioData} isListening={isListening} />
-      </Float>
-
+      <AvatarHead audioData={audioData} isListening={isListening} />
+      <WaveformRing audioData={audioData} isListening={isListening} />
       <ParticleField audioData={audioData} isListening={isListening} />
 
       <ContactShadows
-        position={[0, -1.8, 0]}
-        opacity={0.4}
-        scale={8}
-        blur={2.5}
-        far={4}
-        color="#00d4ff"
+        position={[0, -1.6, 0]}
+        opacity={0.5}
+        scale={10}
+        blur={3}
+        far={5}
+        color="#00aaff"
       />
 
-      <Environment preset="city" environmentIntensity={0.3} />
+      <Environment preset="night" environmentIntensity={0.4} />
+
+      {/* Post-processing */}
+      <EffectComposer>
+        <Bloom
+          intensity={isListening ? 1.2 + audioData.volume * 1.5 : 0.6}
+          luminanceThreshold={0.3}
+          luminanceSmoothing={0.9}
+          mipmapBlur
+        />
+        <ChromaticAberration
+          blendFunction={BlendFunction.NORMAL}
+          offset={[isListening ? 0.001 + audioData.bass * 0.003 : 0.0005, isListening ? 0.001 + audioData.bass * 0.003 : 0.0005] as any}
+        />
+        <Vignette
+          offset={0.3}
+          darkness={0.7}
+          blendFunction={BlendFunction.NORMAL}
+        />
+      </EffectComposer>
     </Canvas>
   );
 }
