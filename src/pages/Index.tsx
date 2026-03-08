@@ -242,18 +242,18 @@ const Index = () => {
           <div className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg" style={{ background: 'hsla(215, 25%, 8%, 0.5)', border: '1px solid hsl(var(--border))' }}>
             <div className="flex-1 space-y-1">
               {currentModelId ? (
-                <>
+                  <>
                   <div className="flex items-center gap-1">
-                    <Cpu className="w-2.5 h-2.5 text-primary" />
-                    <span className="text-[8px] text-primary" style={mono}>{currentModelId.split('-').slice(0, 2).join(' ')}</span>
+                    <Cpu className="w-3 h-3 text-primary" />
+                    <span className="text-[10px] text-primary" style={mono}>{currentModelId.split('-').slice(0, 2).join(' ')}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Volume2 className="w-2.5 h-2.5" style={{ color: tts.isLoaded ? 'hsl(160 80% 50%)' : 'hsl(var(--muted-foreground))' }} />
-                    <span className="text-[8px] text-muted-foreground" style={mono}>Kokoro TTS {tts.isLoaded ? '✓' : tts.isLoading ? '...' : '✗'}</span>
+                    <Volume2 className="w-3 h-3" style={{ color: tts.isLoaded ? 'hsl(160 80% 50%)' : 'hsl(var(--muted-foreground))' }} />
+                    <span className="text-[10px] text-muted-foreground" style={mono}>Kokoro TTS {tts.isLoaded ? '✓' : tts.isLoading ? '...' : '✗'}</span>
                   </div>
                 </>
               ) : (
-                <span className="text-[8px] text-muted-foreground" style={mono}>No model loaded</span>
+                <span className="text-[10px] text-muted-foreground" style={mono}>No model loaded</span>
               )}
             </div>
           </div>
