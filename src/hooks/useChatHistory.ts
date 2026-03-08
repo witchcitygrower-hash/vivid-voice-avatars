@@ -34,8 +34,10 @@ function generateTitle(messages: ChatMessage[]): string {
   return text.length > 40 ? text.substring(0, 40) + '...' : text || 'New Chat';
 }
 
+const initialSessions = loadSessions();
+
 export function useChatHistory() {
-  const [sessions, setSessions] = useState<ChatSession[]>(() => loadSessions());
+  const [sessions, setSessions] = useState<ChatSession[]>(initialSessions);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   useEffect(() => {
