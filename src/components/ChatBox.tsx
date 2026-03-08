@@ -297,15 +297,9 @@ function ChatBox({
 
               {/* Capability legend */}
               <div className="flex items-center justify-center gap-3">
-                {Object.entries(capabilityIcons).map(([key, info]) => {
-                  const Icon = info.icon;
-                  return (
-                    <div key={key} className="flex items-center gap-1">
-                      <Icon className="w-2.5 h-2.5" style={{ color: info.color }} />
-                      <span className="text-[8px] text-muted-foreground" style={{ fontFamily: 'var(--font-mono)' }}>{info.label}</span>
-                    </div>
-                  );
-                })}
+                {Object.keys(capabilityConfig).map(key => (
+                  <CapabilityBadge key={key} cap={key} size="md" />
+                ))}
               </div>
 
               <button
