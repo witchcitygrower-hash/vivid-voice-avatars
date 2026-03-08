@@ -35,22 +35,48 @@ const Index = () => {
     }
   }, [messages, currentModelId]);
 
+  const performanceActions: AvatarAction[] = ['nod', 'wave', 'wave_both', 'sway', 'shrug', 'point', 'salute', 'happy', 'think', 'confused'];
+
+  const detectActionRobust = useCallback((text: string): AvatarAction | null => {
+    const detected = detectAction(text);
+    if (detected) return detected;
+
+    const lower = text.toLowerCase();
+    if (lower.includes('back flip') || lower.includes('backflip') || lower.includes('flip')) return 'backflip';
+    if (lower.includes('explod') || lower.includes('boom')) return 'explode';
+    if (lower.includes('spin') || lower.includes('rotate')) return 'spin';
+    if (lower.includes('dance') || lower.includes('groove')) return 'dance';
+    if (lower.includes('wave')) return 'wave';
+    if (lower.includes('jump')) return 'jump';
+    return null;
+  }, []);
+
+  const triggerActionSafely = useCallback((action: AvatarAction) => {
+    const now = performance.now();
+    if (now - actionCooldownRef.current < 280) return;
+    actionCooldownRef.current = now;
+    avatar.triggerAction(action);
+  }, [avatar.triggerAction]);
+
+  const pickAmbientAction = useCallback((): AvatarAction => {
+    return performanceActions[Math.floor(Math.random() * performanceActions.length)];
+  }, []);
+
   // Auto-speak and detect actions when assistant message finishes
   useEffect(() => {
     if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === 'assistant' && lastMsg.content) {
         tts.speak(lastMsg.content);
-        // Check for action triggers in both user message and assistant response
         const userMsg = messages[messages.length - 2];
-        const actionFromUser = userMsg ? detectAction(userMsg.content) : null;
-        const actionFromAssistant = detectAction(lastMsg.content);
-        const action = actionFromUser || actionFromAssistant;
-        if (action) avatar.triggerAction(action);
+        const actionFromUser = userMsg ? detectActionRobust(userMsg.content) : null;
+        const actionFromAssistant = detectActionRobust(lastMsg.content);
+        const action = actionFromUser || actionFromAssistant || pickAmbientAction();
+        triggerActionSafely(action);
       }
     }
     wasGeneratingRef.current = isGenerating;
-  }, [isGenerating, messages, tts.speak, avatar.triggerAction]);
+  }, [isGenerating, messages, tts.speak, detectActionRobust, pickAmbientAction, triggerActionSafely]);
 
   const handleSend = useCallback((text: string) => {
     if (!history.activeSessionId) {
