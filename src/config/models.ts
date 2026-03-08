@@ -6,9 +6,11 @@ export interface ModelOption {
   vram: string;
   description: string;
   quality: 1 | 2 | 3 | 4 | 5;
+  featured?: boolean;
 }
 
 export const AVAILABLE_MODELS: ModelOption[] = [
+  // === FEATURED / TOP PICKS ===
   {
     id: 'Phi-3.5-mini-instruct-q4f16_1-MLC',
     name: 'Phi 3.5 Mini',
@@ -17,6 +19,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~3.7GB',
     description: 'Best quality — Microsoft\'s strongest small model',
     quality: 5,
+    featured: true,
   },
   {
     id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',
@@ -26,6 +29,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~3GB',
     description: 'Great reasoning — Meta\'s latest compact model',
     quality: 4,
+    featured: true,
   },
   {
     id: 'Qwen2.5-3B-Instruct-q4f16_1-MLC',
@@ -35,6 +39,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~3GB',
     description: 'Strong multilingual — Alibaba\'s versatile model',
     quality: 4,
+    featured: true,
   },
   {
     id: 'SmolLM2-1.7B-Instruct-q4f16_1-MLC',
@@ -44,6 +49,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~2GB',
     description: 'Efficient — HuggingFace\'s optimized small model',
     quality: 3,
+    featured: true,
   },
   {
     id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
@@ -53,6 +59,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~2GB',
     description: 'Good balance — fast with decent quality',
     quality: 3,
+    featured: true,
   },
   {
     id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
@@ -62,6 +69,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~1.5GB',
     description: 'Fast & light — good for quick responses',
     quality: 2,
+    featured: true,
   },
   {
     id: 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',
@@ -70,6 +78,194 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     size: '~350MB',
     vram: '~1GB',
     description: 'Ultra-light — fastest download, basic quality',
+    quality: 1,
+    featured: true,
+  },
+
+  // === EXTENDED MODELS ===
+  // Large models (7B+) — need 6GB+ VRAM
+  {
+    id: 'Llama-3.1-8B-Instruct-q4f16_1-MLC',
+    name: 'Llama 3.1 8B',
+    params: '8B',
+    size: '~4.5GB',
+    vram: '~6.5GB',
+    description: 'Powerful — Meta\'s flagship instruct model',
+    quality: 5,
+  },
+  {
+    id: 'Hermes-3-Llama-3.1-8B-q4f16_1-MLC',
+    name: 'Hermes 3 8B',
+    params: '8B',
+    size: '~4.5GB',
+    vram: '~6.5GB',
+    description: 'Hermes fine-tune — creative & conversational',
+    quality: 5,
+  },
+  {
+    id: 'Mistral-7B-Instruct-v0.3-q4f16_1-MLC',
+    name: 'Mistral 7B v0.3',
+    params: '7B',
+    size: '~4.2GB',
+    vram: '~6GB',
+    description: 'Strong general — Mistral\'s core model',
+    quality: 5,
+  },
+  {
+    id: 'Hermes-2-Pro-Mistral-7B-q4f16_1-MLC',
+    name: 'Hermes 2 Pro 7B',
+    params: '7B',
+    size: '~4.2GB',
+    vram: '~6GB',
+    description: 'Function calling & structured output specialist',
+    quality: 5,
+  },
+  {
+    id: 'Qwen2.5-7B-Instruct-q4f16_1-MLC',
+    name: 'Qwen 2.5 7B',
+    params: '7B',
+    size: '~4GB',
+    vram: '~6GB',
+    description: 'Top multilingual — excellent coding & reasoning',
+    quality: 5,
+  },
+  {
+    id: 'gemma-2-9b-it-q4f16_1-MLC',
+    name: 'Gemma 2 9B',
+    params: '9B',
+    size: '~5.2GB',
+    vram: '~7.5GB',
+    description: 'Google\'s latest — great at instruction following',
+    quality: 5,
+  },
+  {
+    id: 'Phi-3-medium-128k-instruct-q4f16_1-MLC',
+    name: 'Phi 3 Medium 14B',
+    params: '14B',
+    size: '~8GB',
+    vram: '~10GB',
+    description: 'Microsoft\'s largest — 128k context, top quality',
+    quality: 5,
+  },
+
+  // Medium models (2-4B)
+  {
+    id: 'gemma-2-2b-it-q4f16_1-MLC',
+    name: 'Gemma 2 2B',
+    params: '2B',
+    size: '~1.3GB',
+    vram: '~2.5GB',
+    description: 'Google\'s compact — solid general assistant',
+    quality: 3,
+  },
+  {
+    id: 'Phi-3-mini-128k-instruct-q4f16_1-MLC',
+    name: 'Phi 3 Mini 128k',
+    params: '3.8B',
+    size: '~2.4GB',
+    vram: '~3.7GB',
+    description: 'Long context variant — 128k token window',
+    quality: 4,
+  },
+  {
+    id: 'stablelm-2-zephyr-1_6b-q4f16_1-MLC',
+    name: 'StableLM 2 1.6B',
+    params: '1.6B',
+    size: '~1GB',
+    vram: '~2GB',
+    description: 'Stability AI — good conversational ability',
+    quality: 3,
+  },
+  {
+    id: 'RedPajama-INCITE-Chat-3B-v1-q4f16_1-MLC',
+    name: 'RedPajama 3B',
+    params: '3B',
+    size: '~1.8GB',
+    vram: '~3GB',
+    description: 'Open source — Together AI\'s chat model',
+    quality: 3,
+  },
+  {
+    id: 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC',
+    name: 'TinyLlama 1.1B',
+    params: '1.1B',
+    size: '~650MB',
+    vram: '~1.5GB',
+    description: 'Minimal footprint — surprisingly capable',
+    quality: 2,
+  },
+
+  // Quantization variants (q4f32 — slightly better quality, more VRAM)
+  {
+    id: 'Phi-3.5-mini-instruct-q4f32_1-MLC',
+    name: 'Phi 3.5 Mini (f32)',
+    params: '3.8B',
+    size: '~3.5GB',
+    vram: '~5GB',
+    description: 'Higher precision quantization — better quality',
+    quality: 5,
+  },
+  {
+    id: 'Llama-3.2-3B-Instruct-q4f32_1-MLC',
+    name: 'Llama 3.2 3B (f32)',
+    params: '3B',
+    size: '~2.8GB',
+    vram: '~4.5GB',
+    description: 'Higher precision — improved reasoning',
+    quality: 4,
+  },
+  {
+    id: 'Llama-3.2-1B-Instruct-q4f32_1-MLC',
+    name: 'Llama 3.2 1B (f32)',
+    params: '1B',
+    size: '~1.1GB',
+    vram: '~2GB',
+    description: 'Higher precision — better for its size',
+    quality: 3,
+  },
+  {
+    id: 'Qwen2.5-1.5B-Instruct-q4f32_1-MLC',
+    name: 'Qwen 2.5 1.5B (f32)',
+    params: '1.5B',
+    size: '~1.5GB',
+    vram: '~2.8GB',
+    description: 'Higher precision Qwen variant',
+    quality: 3,
+  },
+  {
+    id: 'Qwen2.5-0.5B-Instruct-q4f32_1-MLC',
+    name: 'Qwen 2.5 0.5B (f32)',
+    params: '0.5B',
+    size: '~600MB',
+    vram: '~1.5GB',
+    description: 'Tiny but better precision',
+    quality: 2,
+  },
+  {
+    id: 'SmolLM2-1.7B-Instruct-q4f32_1-MLC',
+    name: 'SmolLM2 1.7B (f32)',
+    params: '1.7B',
+    size: '~1.5GB',
+    vram: '~2.8GB',
+    description: 'Higher precision SmolLM variant',
+    quality: 3,
+  },
+  {
+    id: 'SmolLM2-360M-Instruct-q0f16-MLC',
+    name: 'SmolLM2 360M',
+    params: '360M',
+    size: '~250MB',
+    vram: '~800MB',
+    description: 'Absolute smallest — instant download',
+    quality: 1,
+  },
+  {
+    id: 'SmolLM2-135M-Instruct-q0f16-MLC',
+    name: 'SmolLM2 135M',
+    params: '135M',
+    size: '~100MB',
+    vram: '~500MB',
+    description: 'Nano model — toy quality, blazing fast',
     quality: 1,
   },
 ];
