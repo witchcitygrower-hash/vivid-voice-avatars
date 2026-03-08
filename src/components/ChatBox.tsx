@@ -159,6 +159,7 @@ function ChatBox({
   const [input, setInput] = useState('');
   const [selectedModelId, setSelectedModelId] = useState(AVAILABLE_MODELS[0].id);
   const [showModelPicker, setShowModelPicker] = useState(false);
+  const [showAllModels, setShowAllModels] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
