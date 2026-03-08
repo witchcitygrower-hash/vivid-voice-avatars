@@ -497,8 +497,8 @@ function ChatBox({
           </div>
         ))}
 
-        {/* Typing indicator */}
-        {isGenerating && messages[messages.length - 1]?.role === 'assistant' && (
+        {/* Typing / processing indicator */}
+        {isGenerating && (
           <div className="flex items-center gap-2 pl-1">
             <div className="flex items-center gap-1">
               {[0, 1, 2].map((i) => (
@@ -509,7 +509,7 @@ function ChatBox({
               ))}
             </div>
             <span className="text-[8px] tracking-wider text-muted-foreground" style={mono}>
-              {messages[messages.length - 1]?.content ? `${messages[messages.length - 1].content.split(/\s+/).filter(Boolean).length} words` : 'THINKING'}
+              THINKING
             </span>
           </div>
         )}
