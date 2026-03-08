@@ -176,13 +176,13 @@ const Index = () => {
             {/* Status dot */}
             <div className="absolute bottom-2 left-2 flex items-center gap-1.5" style={mono}>
               <div
-                className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                className="w-2 h-2 rounded-full transition-all duration-300"
                 style={{
                   background: tts.isSpeaking ? 'hsl(160 100% 55%)' : isGenerating ? 'hsl(45 100% 55%)' : 'hsl(var(--muted-foreground))',
                   boxShadow: tts.isSpeaking ? '0 0 8px hsl(160 100% 55%)' : isGenerating ? '0 0 8px hsl(45 100% 55%)' : 'none',
                 }}
               />
-              <span className="text-[7px] tracking-[0.15em] uppercase" style={{
+              <span className="text-[9px] tracking-[0.12em] uppercase" style={{
                 color: tts.isSpeaking ? 'hsl(160 70% 55%)' : isGenerating ? 'hsl(45 80% 55%)' : 'hsl(var(--muted-foreground))',
               }}>
                 {tts.isSpeaking ? 'Speaking' : isGenerating ? 'Thinking' : 'Standby'}
@@ -191,7 +191,7 @@ const Index = () => {
 
             {/* System badges */}
             <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
-              <span className="text-[8px] tracking-[0.2em] uppercase font-medium text-primary" style={mono}>
+              <span className="text-[10px] tracking-[0.15em] uppercase font-medium text-primary" style={mono}>
                 Neural
               </span>
               <div className="flex items-center gap-1">
@@ -202,7 +202,7 @@ const Index = () => {
                 ].map(({ label, ready, loading }) => (
                   <span
                     key={label}
-                    className="text-[5px] px-1 py-px rounded tracking-wider"
+                    className="text-[7px] px-1.5 py-px rounded tracking-wider"
                     style={{
                       background: ready ? 'hsla(160, 100%, 50%, 0.1)' : loading ? 'hsla(45, 100%, 55%, 0.1)' : 'hsla(210, 15%, 30%, 0.2)',
                       border: `1px solid ${ready ? 'hsla(160, 100%, 50%, 0.2)' : loading ? 'hsla(45, 100%, 55%, 0.2)' : 'hsla(210, 15%, 30%, 0.1)'}`,
@@ -218,7 +218,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Audio bars when speaking */}
+      {/* Audio bars when speaking */}
         {tts.isSpeaking && (
           <div className="px-3 pb-2 flex flex-col gap-1 shrink-0" style={mono}>
             {[
@@ -228,7 +228,7 @@ const Index = () => {
               { label: 'HIGH', value: activeAudioData.treble, color: 'hsl(160 80% 50%)' },
             ].map(({ label, value, color }) => (
               <div key={label} className="flex items-center gap-1.5">
-                <span className="text-[7px] tracking-wider w-6 text-right text-muted-foreground">{label}</span>
+                <span className="text-[9px] tracking-wider w-7 text-right text-muted-foreground">{label}</span>
                 <div className="flex-1 h-[3px] rounded-full overflow-hidden bg-muted">
                   <div className="h-full rounded-full transition-all duration-75" style={{ width: `${value * 100}%`, background: color, boxShadow: value > 0.3 ? `0 0 6px ${color}` : 'none' }} />
                 </div>
@@ -242,18 +242,18 @@ const Index = () => {
           <div className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg" style={{ background: 'hsla(215, 25%, 8%, 0.5)', border: '1px solid hsl(var(--border))' }}>
             <div className="flex-1 space-y-1">
               {currentModelId ? (
-                <>
+                  <>
                   <div className="flex items-center gap-1">
-                    <Cpu className="w-2.5 h-2.5 text-primary" />
-                    <span className="text-[8px] text-primary" style={mono}>{currentModelId.split('-').slice(0, 2).join(' ')}</span>
+                    <Cpu className="w-3 h-3 text-primary" />
+                    <span className="text-[10px] text-primary" style={mono}>{currentModelId.split('-').slice(0, 2).join(' ')}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Volume2 className="w-2.5 h-2.5" style={{ color: tts.isLoaded ? 'hsl(160 80% 50%)' : 'hsl(var(--muted-foreground))' }} />
-                    <span className="text-[8px] text-muted-foreground" style={mono}>Kokoro TTS {tts.isLoaded ? '✓' : tts.isLoading ? '...' : '✗'}</span>
+                    <Volume2 className="w-3 h-3" style={{ color: tts.isLoaded ? 'hsl(160 80% 50%)' : 'hsl(var(--muted-foreground))' }} />
+                    <span className="text-[10px] text-muted-foreground" style={mono}>Kokoro TTS {tts.isLoaded ? '✓' : tts.isLoading ? '...' : '✗'}</span>
                   </div>
                 </>
               ) : (
-                <span className="text-[8px] text-muted-foreground" style={mono}>No model loaded</span>
+                <span className="text-[10px] text-muted-foreground" style={mono}>No model loaded</span>
               )}
             </div>
           </div>
@@ -271,25 +271,25 @@ const Index = () => {
               ...mono,
             }}
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="text-[10px] tracking-wider uppercase">New Chat</span>
+            <Plus className="w-4 h-4" />
+            <span className="text-xs tracking-wider uppercase">New Chat</span>
           </button>
         </div>
 
         {/* Chat history */}
         <div className="flex-1 overflow-y-auto px-3 pb-3" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.15) transparent' }}>
           <div className="flex items-center gap-2 py-2">
-            <span className="text-[8px] tracking-[0.2em] uppercase text-muted-foreground" style={mono}>
+            <span className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground" style={mono}>
               History
             </span>
             <div className="flex-1 h-px bg-border" />
             {history.sessions.length > 0 && (
-              <span className="text-[7px] text-muted-foreground" style={mono}>{history.sessions.length}</span>
+              <span className="text-[9px] text-muted-foreground" style={mono}>{history.sessions.length}</span>
             )}
           </div>
 
           {history.sessions.length === 0 && (
-            <p className="text-[9px] text-muted-foreground text-center py-4" style={mono}>
+            <p className="text-[11px] text-muted-foreground text-center py-4" style={mono}>
               No conversations yet
             </p>
           )}
@@ -307,15 +307,15 @@ const Index = () => {
                   }}
                   onClick={() => handleSwitchChat(session.id)}
                 >
-                  <MessageSquare className="w-3 h-3 shrink-0" style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
+                  <MessageSquare className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] truncate" style={{
+                    <p className="text-xs truncate" style={{
                       color: isActive ? 'hsl(190 60% 65%)' : 'hsl(210 10% 55%)',
                       ...mono,
                     }}>
                       {session.title}
                     </p>
-                    <p className="text-[7px] text-muted-foreground" style={mono}>
+                    <p className="text-[9px] text-muted-foreground" style={mono}>
                       {session.messages.length} msgs
                     </p>
                   </div>
