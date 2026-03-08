@@ -70,7 +70,7 @@ function ChatBox({ isLoaded, isLoading, loadProgress, isGenerating, messages, on
           <div className="flex flex-col items-center justify-center h-full gap-3 py-6">
             <p className="text-xs text-center" style={{ color: 'hsl(210 15% 45%)' }}>
               Load the AI model to start chatting.<br />
-              <span style={{ color: 'hsl(210 15% 35%)' }}>Runs 100% in your browser via WebGPU.</span>
+              <span style={{ color: 'hsl(210 15% 35%)' }}>Runs 100% in your browser via WebGPU.<br/>Requires ~3.7GB VRAM.</span>
             </p>
             <button
               onClick={onInit}
