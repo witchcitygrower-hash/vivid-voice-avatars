@@ -92,7 +92,7 @@ function SVGAvatar({ audioData, isListening }: Props) {
 
       {/* Main avatar SVG */}
       <svg
-        viewBox="0 0 500 650"
+        viewBox="0 0 500 750"
         className="relative z-10 w-[min(85vh,85vw)] h-auto"
         style={{ filter: `drop-shadow(0 0 ${15 + s.volume * 30}px hsla(190, 100%, 50%, ${glowIntensity * 0.2}))` }}
       >
@@ -134,9 +134,15 @@ function SVGAvatar({ audioData, isListening }: Props) {
             <stop offset="100%" stopColor="hsl(225 18% 30%)" />
           </linearGradient>
 
-          <linearGradient id="shoulderPlate" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(215 14% 60%)" />
-            <stop offset="100%" stopColor="hsl(225 16% 42%)" />
+          <linearGradient id="bodyPlate" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="hsl(215 16% 62%)" />
+            <stop offset="40%" stopColor="hsl(218 14% 52%)" />
+            <stop offset="100%" stopColor="hsl(222 16% 40%)" />
+          </linearGradient>
+
+          <linearGradient id="armPlate" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="hsl(215 14% 58%)" />
+            <stop offset="100%" stopColor="hsl(220 16% 44%)" />
           </linearGradient>
 
           <linearGradient id="visorBand" x1="0" y1="0" x2="0" y2="1">
@@ -201,32 +207,6 @@ function SVGAvatar({ audioData, isListening }: Props) {
             })}
           </g>
 
-          {/* === SHOULDER MOUNTS === */}
-          {[-1, 1].map((side) => (
-            <g key={`shoulder-${side}`} transform={`translate(${side * 95}, 120)`}>
-              {/* Main shoulder plate */}
-              <path
-                d={side > 0
-                  ? "M-15,-15 L30,-20 Q45,-18 45,0 L45,30 Q45,40 35,42 L-15,35 Q-25,33 -25,20 L-25,-5 Q-25,-13 -15,-15Z"
-                  : "M15,-15 L-30,-20 Q-45,-18 -45,0 L-45,30 Q-45,40 -35,42 L15,35 Q25,33 25,20 L25,-5 Q25,-13 15,-15Z"
-                }
-                fill="url(#shoulderPlate)"
-                stroke="hsl(210 12% 45%)"
-                strokeWidth="0.8"
-              />
-              {/* Shoulder vent lines */}
-              {[0, 8, 16].map((y, j) => (
-                <line key={j}
-                  x1={side > 0 ? -8 : -20} y1={y} x2={side > 0 ? 20 : 8} y2={y}
-                  stroke="hsl(220 20% 25%)" strokeWidth="2" strokeLinecap="round" />
-              ))}
-              {/* Shoulder light */}
-              <circle cx={side * 5} cy={-8} r="3"
-                fill={`hsl(190 100% 55%)`}
-                opacity={0.3 + s.volume * 0.5}
-                filter="url(#glow)" />
-            </g>
-          ))}
 
           {/* === NECK MECHANISM === */}
           <g>
@@ -496,11 +476,87 @@ function SVGAvatar({ audioData, isListening }: Props) {
           </g>
         )}
 
-        {/* === CHEST CORE GLOW (visible at bottom) === */}
-        <g transform="translate(250, 415)">
-          <ellipse cx="0" cy="0" rx="40" ry="25" fill="url(#chestCore)" filter="url(#softGlow)" />
-          <ellipse cx="0" cy="0" rx="12" ry="8" fill={`hsla(190, 100%, 60%, ${0.15 + s.volume * 0.3})`} />
+        {/* === SQUARE BODY === */}
+        <g transform={`translate(250, ${400 + breathe * 0.5})`}>
+          {/* Main torso block */}
+          <rect x="-70" y="-20" width="140" height="110" rx="8"
+            fill="url(#bodyPlate)" stroke="hsl(210 12% 45%)" strokeWidth="1" />
+          {/* Shadow depth */}
+          <rect x="-68" y="-18" width="136" height="106" rx="7"
+            fill="none" stroke="hsla(210, 20%, 90%, 0.05)" strokeWidth="0.5" />
+
+          {/* Center chest panel */}
+          <rect x="-35" y="-10" width="70" height="50" rx="5"
+            fill="hsl(220 30% 12%)" stroke="hsl(215 20% 22%)" strokeWidth="0.5" />
+
+          {/* Chest core light */}
+          <circle cx="0" cy="15" r="18" fill="url(#chestCore)" filter="url(#softGlow)" />
+          <circle cx="0" cy="15" r="10" fill={`hsla(190, 100%, 60%, ${0.15 + s.volume * 0.4})`} />
+          <circle cx="0" cy="15" r="5" fill={`hsla(190, 100%, 75%, ${0.2 + s.volume * 0.3})`} filter="url(#glow)" />
+
+          {/* Chest panel lines */}
+          {[-1, 1].map((side) => (
+            <g key={`chest-detail-${side}`}>
+              {[0, 10, 20].map((y, j) => (
+                <rect key={j} x={side > 0 ? 42 : -60} y={-5 + y} width="16" height="3" rx="1"
+                  fill="hsl(220 25% 15%)" />
+              ))}
+              <circle cx={side * 52} cy={35} r="3"
+                fill="hsl(190 100% 55%)" opacity={0.2 + s.volume * 0.4} filter="url(#glow)" />
+            </g>
+          ))}
+
+          {/* Bottom edge accent */}
+          <rect x="-50" y="80" width="100" height="2" rx="1" fill="url(#chinAccent)" filter="url(#glow)" />
+
+          {/* Waist panel */}
+          <rect x="-55" y="72" width="110" height="16" rx="3"
+            fill="hsl(218 16% 38%)" stroke="hsl(215 14% 32%)" strokeWidth="0.5" />
         </g>
+
+        {/* === ARMS === */}
+        {[-1, 1].map((side) => {
+          const armSwing = Math.sin(t * 0.8 + side * 1.5) * 3 + s.volume * 4 * side;
+          return (
+            <g key={`arm-${side}`} transform={`translate(${250 + side * 85}, ${390 + breathe * 0.5})`}>
+              {/* Shoulder joint */}
+              <circle cx="0" cy="0" r="12" fill="hsl(215 14% 55%)" stroke="hsl(210 12% 45%)" strokeWidth="1" />
+              <circle cx="0" cy="0" r="5" fill="hsl(220 20% 20%)" />
+              <circle cx="0" cy="0" r="2.5" fill="hsl(190 100% 55%)" opacity={0.3 + s.volume * 0.3} filter="url(#glow)" />
+
+              {/* Upper arm */}
+              <g transform={`rotate(${armSwing})`}>
+                <rect x="-10" y="8" width="20" height="50" rx="5"
+                  fill="url(#armPlate)" stroke="hsl(210 12% 42%)" strokeWidth="0.8" />
+                {/* Upper arm detail */}
+                <rect x="-6" y="15" width="12" height="20" rx="3" fill="hsl(220 22% 16%)" />
+                <rect x="-3" y="18" width={6} height="3" rx="1"
+                  fill="hsl(190 100% 55%)" opacity={0.2 + s.mid * 0.4} />
+
+                {/* Elbow joint */}
+                <circle cx="0" cy="60" r="8" fill="hsl(215 14% 50%)" stroke="hsl(210 12% 40%)" strokeWidth="0.8" />
+                <circle cx="0" cy="60" r="3" fill="hsl(220 20% 18%)" />
+
+                {/* Forearm */}
+                <g transform={`translate(0, 60) rotate(${-armSwing * 0.5 + side * 5})`}>
+                  <rect x="-8" y="5" width="16" height="45" rx="4"
+                    fill="url(#armPlate)" stroke="hsl(210 12% 42%)" strokeWidth="0.7" />
+                  {/* Forearm accent */}
+                  <line x1="-4" y1="15" x2="-4" y2="40" stroke="hsl(190 50% 40%)" strokeWidth="0.6" opacity="0.3" />
+                  <line x1="4" y1="15" x2="4" y2="40" stroke="hsl(190 50% 40%)" strokeWidth="0.6" opacity="0.3" />
+
+                  {/* Hand */}
+                  <rect x="-9" y="48" width="18" height="14" rx="5"
+                    fill="hsl(215 14% 52%)" stroke="hsl(210 12% 42%)" strokeWidth="0.6" />
+                  {/* Finger lines */}
+                  {[-4, 0, 4].map((fx, fi) => (
+                    <line key={fi} x1={fx} y1="55" x2={fx} y2="60" stroke="hsl(210 10% 40%)" strokeWidth="1" strokeLinecap="round" />
+                  ))}
+                </g>
+              </g>
+            </g>
+          );
+        })}
       </svg>
     </div>
   );
