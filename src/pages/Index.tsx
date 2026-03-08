@@ -74,22 +74,20 @@ const Index = () => {
     return performanceActions[Math.floor(Math.random() * performanceActions.length)];
   }, []);
 
-  // Auto-speak and detect actions when assistant message finishes
-  // Add a brief "Thinking" pause so the status dot shows yellow before TTS starts
+  // When generation finishes, synthesize TTS and trigger animation only when audio starts playing
   useEffect(() => {
     if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === 'assistant' && lastMsg.content) {
-        // Small delay so user sees "Thinking" → "Speaking" transition
-        const delay = setTimeout(() => {
-          tts.speak(lastMsg.content);
-          const userMsg = messages[messages.length - 2];
-          const actionFromUser = userMsg ? detectActionRobust(userMsg.content) : null;
-          const actionFromAssistant = detectActionRobust(lastMsg.content);
-          const action = actionFromUser || actionFromAssistant || pickAmbientAction();
+        const userMsg = messages[messages.length - 2];
+        const actionFromUser = userMsg ? detectActionRobust(userMsg.content) : null;
+        const actionFromAssistant = detectActionRobust(lastMsg.content);
+        const action = actionFromUser || actionFromAssistant || pickAmbientAction();
+
+        // Pass callback — animation fires exactly when audio playback begins
+        tts.speak(lastMsg.content, () => {
           triggerActionSafely(action);
-        }, 400);
-        return () => clearTimeout(delay);
+        });
       }
     }
     wasGeneratingRef.current = isGenerating;
@@ -99,12 +97,8 @@ const Index = () => {
     if (!history.activeSessionId) {
       history.createSession(currentModelId);
     }
-    const userAction = detectActionRobust(text);
-    if (userAction) {
-      triggerActionSafely(userAction);
-    }
     sendMessage(text);
-  }, [history.activeSessionId, currentModelId, sendMessage, history.createSession, detectActionRobust, triggerActionSafely]);
+  }, [history.activeSessionId, currentModelId, sendMessage, history.createSession]);
 
   const handleNewChat = useCallback(() => {
     clearMessages();
