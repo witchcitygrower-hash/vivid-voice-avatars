@@ -228,7 +228,7 @@ function ChatBox({
                     <div className="flex items-center gap-1">
                       {selectedModel.capabilities.map(cap => (
                         <CapabilityBadge key={cap} cap={cap} />
-                      ))}
+                    </div>
                   </div>
                   <p className="text-[10px] mt-0.5 text-muted-foreground">{selectedModel.description}</p>
                 </div>
