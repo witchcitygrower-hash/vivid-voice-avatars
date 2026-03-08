@@ -143,12 +143,17 @@ const Index = () => {
             <Menu className="w-5 h-5 text-primary" />
           </button>
 
-          {/* Mini avatar */}
-          <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0" style={{
-            border: '1px solid hsla(190, 80%, 40%, 0.2)',
-          }}>
-            <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} action={avatar.currentAction} actionProgress={avatar.animProgress} />
-          </div>
+          {/* Mini avatar - only show when model is loaded to avoid overlap on picker */}
+          {isLoaded && (
+            <div className="w-10 h-10 rounded-lg shrink-0 relative" style={{
+              border: '1px solid hsla(190, 80%, 40%, 0.2)',
+              overflow: 'hidden',
+            }}>
+              <div className="absolute inset-0">
+                <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} action={avatar.currentAction} actionProgress={avatar.animProgress} />
+              </div>
+            </div>
+          )}
 
           {/* Status */}
           <div className="flex-1 min-w-0">
