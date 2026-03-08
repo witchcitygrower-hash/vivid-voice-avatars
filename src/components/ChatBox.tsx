@@ -144,9 +144,16 @@ function SettingsPanel({ settings, onUpdate, onClose }: { settings: ModelSetting
   );
 }
 
+const DEFAULT_SETTINGS: ModelSettings = {
+  systemPrompt: 'You are a friendly, helpful robot assistant called Neural. Keep responses concise and engaging. Use casual, warm language.',
+  temperature: 0.7,
+  maxTokens: 512,
+  topP: 0.9,
+};
+
 function ChatBox({
   isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId,
-  ttsEnabled, ttsLoading, ttsLoaded, ttsSpeaking, ttsProgress, lastStats, settings,
+  ttsEnabled, ttsLoading, ttsLoaded, ttsSpeaking, ttsProgress, lastStats, settings = DEFAULT_SETTINGS,
   onSend, onClear, onInit, onToggleTTS, onUpdateSettings,
 }: Props) {
   const [input, setInput] = useState('');
