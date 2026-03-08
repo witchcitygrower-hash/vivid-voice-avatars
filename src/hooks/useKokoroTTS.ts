@@ -170,7 +170,7 @@ export function useKokoroTTS() {
     console.log('[TTS] Playback started');
   }, [analyzeLoop, resetState]);
 
-  const speak = useCallback(async (text: string) => {
+  const speak = useCallback(async (text: string, onPlaybackStart?: () => void) => {
     console.log('[TTS] speak() called. loaded:', !!ttsRef.current, 'speaking:', isSpeakingRef.current, 'enabled:', ttsEnabledRef.current);
 
     if (isSpeakingRef.current || !ttsEnabledRef.current) return;
@@ -178,6 +178,7 @@ export function useKokoroTTS() {
     // If Kokoro not loaded, use browser fallback
     if (!ttsRef.current) {
       speakFallback(text);
+      onPlaybackStart?.();
       return;
     }
 
@@ -198,11 +199,12 @@ export function useKokoroTTS() {
 
       if (!samples || samples.length === 0) throw new Error('No audio data');
 
-      playAudio(samples, sampleRate);
+      playAudio(samples, sampleRate, onPlaybackStart);
     } catch (e) {
       console.error('[TTS] Kokoro error, falling back:', e);
       resetState();
       speakFallback(text);
+      onPlaybackStart?.();
     }
   }, [speakFallback, playAudio, resetState]);
 
