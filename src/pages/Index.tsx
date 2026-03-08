@@ -109,7 +109,7 @@ const Index = () => {
               boxShadow: '0 0 40px hsla(190, 100%, 50%, 0.06)',
             }}
           >
-            <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} />
+            <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} action={avatar.currentAction} actionProgress={avatar.animProgress} />
 
             {/* Status dot */}
             <div className="absolute bottom-2 left-2 flex items-center gap-1.5" style={mono}>
