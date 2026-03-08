@@ -134,9 +134,15 @@ function SVGAvatar({ audioData, isListening }: Props) {
             <stop offset="100%" stopColor="hsl(225 18% 30%)" />
           </linearGradient>
 
-          <linearGradient id="shoulderPlate" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(215 14% 60%)" />
-            <stop offset="100%" stopColor="hsl(225 16% 42%)" />
+          <linearGradient id="bodyPlate" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="hsl(215 16% 62%)" />
+            <stop offset="40%" stopColor="hsl(218 14% 52%)" />
+            <stop offset="100%" stopColor="hsl(222 16% 40%)" />
+          </linearGradient>
+
+          <linearGradient id="armPlate" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="hsl(215 14% 58%)" />
+            <stop offset="100%" stopColor="hsl(220 16% 44%)" />
           </linearGradient>
 
           <linearGradient id="visorBand" x1="0" y1="0" x2="0" y2="1">
