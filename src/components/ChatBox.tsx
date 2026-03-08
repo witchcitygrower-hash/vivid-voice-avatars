@@ -552,7 +552,7 @@ function ChatBox({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={isLoaded ? 'Type or use mic to speak...' : 'Load a model first...'}
-            disabled={!isLoaded || isGenerating}
+            disabled={!isLoaded}
             className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground/30 disabled:opacity-15"
             style={mono}
           />

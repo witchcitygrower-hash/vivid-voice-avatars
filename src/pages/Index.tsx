@@ -82,14 +82,12 @@ const Index = () => {
     if (!history.activeSessionId) {
       history.createSession(currentModelId);
     }
-    // Immediately trigger action from user message so it plays during generation
-    const userAction = detectAction(text);
+    const userAction = detectActionRobust(text);
     if (userAction) {
-      console.log('[Action] Detected from user input:', userAction);
-      avatar.triggerAction(userAction);
+      triggerActionSafely(userAction);
     }
     sendMessage(text);
-  }, [history.activeSessionId, currentModelId, sendMessage, history.createSession, avatar.triggerAction]);
+  }, [history.activeSessionId, currentModelId, sendMessage, history.createSession, detectActionRobust, triggerActionSafely]);
 
   const handleNewChat = useCallback(() => {
     clearMessages();
