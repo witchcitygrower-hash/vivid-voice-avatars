@@ -191,7 +191,7 @@ const Index = () => {
 
             {/* System badges */}
             <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
-              <span className="text-[8px] tracking-[0.2em] uppercase font-medium text-primary" style={mono}>
+              <span className="text-[10px] tracking-[0.15em] uppercase font-medium text-primary" style={mono}>
                 Neural
               </span>
               <div className="flex items-center gap-1">
@@ -202,7 +202,7 @@ const Index = () => {
                 ].map(({ label, ready, loading }) => (
                   <span
                     key={label}
-                    className="text-[5px] px-1 py-px rounded tracking-wider"
+                    className="text-[7px] px-1.5 py-px rounded tracking-wider"
                     style={{
                       background: ready ? 'hsla(160, 100%, 50%, 0.1)' : loading ? 'hsla(45, 100%, 55%, 0.1)' : 'hsla(210, 15%, 30%, 0.2)',
                       border: `1px solid ${ready ? 'hsla(160, 100%, 50%, 0.2)' : loading ? 'hsla(45, 100%, 55%, 0.2)' : 'hsla(210, 15%, 30%, 0.1)'}`,
