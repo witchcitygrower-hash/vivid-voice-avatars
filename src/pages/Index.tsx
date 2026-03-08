@@ -1,10 +1,13 @@
 import { useAudioAnalyzer } from '@/hooks/useAudioAnalyzer';
+import { useWebLLM } from '@/hooks/useWebLLM';
 import SVGAvatar from '@/components/SVGAvatar';
 import AudioVisualizer from '@/components/AudioVisualizer';
+import ChatBox from '@/components/ChatBox';
 import { Mic, MicOff } from 'lucide-react';
 
 const Index = () => {
   const { isListening, audioData, startListening, stopListening } = useAudioAnalyzer();
+  const { isLoaded, isLoading, loadProgress, isGenerating, messages, initEngine, sendMessage, clearMessages } = useWebLLM();
 
   return (
     <div className="relative w-screen h-screen overflow-hidden select-none" style={{ background: 'hsl(220 50% 4%)' }}>
@@ -16,10 +19,7 @@ const Index = () => {
 
       {/* Title */}
       <div className="absolute top-5 left-1/2 -translate-x-1/2 text-center pointer-events-none z-10">
-        <h1
-          className="text-lg tracking-[0.4em] uppercase font-light"
-          style={{ fontFamily: 'var(--font-display)', color: 'hsl(210 20% 50%)' }}
-        >
+        <h1 className="text-lg tracking-[0.4em] uppercase font-light" style={{ fontFamily: 'var(--font-display)', color: 'hsl(210 20% 50%)' }}>
           Neural <span className="font-semibold" style={{ color: 'hsl(190 100% 55%)' }}>Avatar</span>
         </h1>
         <div className="flex items-center justify-center gap-2 mt-1.5">
@@ -30,10 +30,7 @@ const Index = () => {
               boxShadow: isListening ? '0 0 8px hsl(190 100% 55%)' : 'none',
             }}
           />
-          <p
-            className="text-[10px] tracking-[0.25em]"
-            style={{ fontFamily: 'var(--font-mono)', color: 'hsl(210 15% 45%)' }}
-          >
+          <p className="text-[10px] tracking-[0.25em]" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(210 15% 45%)' }}>
             {isListening ? 'ACTIVE — PROCESSING AUDIO' : 'STANDBY — AWAITING INPUT'}
           </p>
         </div>
@@ -42,8 +39,22 @@ const Index = () => {
       {/* Audio visualizer */}
       <AudioVisualizer audioData={audioData} isListening={isListening} />
 
+      {/* Chat box - bottom right */}
+      <div className="absolute bottom-4 right-4 z-20">
+        <ChatBox
+          isLoaded={isLoaded}
+          isLoading={isLoading}
+          loadProgress={loadProgress}
+          isGenerating={isGenerating}
+          messages={messages}
+          onSend={sendMessage}
+          onClear={clearMessages}
+          onInit={initEngine}
+        />
+      </div>
+
       {/* Bottom gradient */}
-      <div className="absolute bottom-0 inset-x-0 h-40 pointer-events-none" style={{ background: 'linear-gradient(to top, hsla(220, 50%, 4%, 0.95), transparent)' }} />
+      <div className="absolute bottom-0 inset-x-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to top, hsla(220, 50%, 4%, 0.9), transparent)' }} />
 
       {/* Mic button */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
@@ -74,20 +85,17 @@ const Index = () => {
 
       {/* Stats */}
       {isListening && (
-        <div className="absolute bottom-10 right-5 flex flex-col gap-1.5 text-right z-10" style={{ fontFamily: 'var(--font-mono)' }}>
+        <div className="absolute bottom-10 left-5 flex flex-col gap-1.5 text-left z-10" style={{ fontFamily: 'var(--font-mono)' }}>
           {[
             { label: 'VOL', value: audioData.volume, color: 'hsl(190 100% 55%)' },
             { label: 'BASS', value: audioData.bass, color: 'hsl(340 80% 55%)' },
             { label: 'MID', value: audioData.mid, color: 'hsl(260 70% 60%)' },
             { label: 'HI', value: audioData.treble, color: 'hsl(160 80% 50%)' },
           ].map(({ label, value, color }) => (
-            <div key={label} className="flex items-center gap-2 justify-end">
-              <span className="text-[9px] tracking-wider" style={{ color: 'hsl(210 15% 40%)' }}>{label}</span>
+            <div key={label} className="flex items-center gap-2">
+              <span className="text-[9px] tracking-wider w-6" style={{ color: 'hsl(210 15% 40%)' }}>{label}</span>
               <div className="w-14 h-1 rounded-full overflow-hidden" style={{ background: 'hsla(210, 15%, 20%, 0.5)' }}>
-                <div
-                  className="h-full rounded-full transition-all duration-75"
-                  style={{ width: `${value * 100}%`, background: color, boxShadow: value > 0.3 ? `0 0 6px ${color}` : 'none' }}
-                />
+                <div className="h-full rounded-full transition-all duration-75" style={{ width: `${value * 100}%`, background: color, boxShadow: value > 0.3 ? `0 0 6px ${color}` : 'none' }} />
               </div>
             </div>
           ))}
