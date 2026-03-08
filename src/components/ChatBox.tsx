@@ -228,17 +228,11 @@ function ChatBox({
                       {selectedModel.params}
                     </span>
                     {/* Capability badges */}
-                    <div className="flex items-center gap-0.5">
-                      {selectedModel.capabilities.map(cap => {
-                        const info = capabilityIcons[cap];
-                        if (!info) return null;
-                        const Icon = info.icon;
-                        return (
-                          <span key={cap} className="flex items-center gap-0.5 text-[7px] px-1 py-px rounded" style={{
-                            background: `${info.color}10`,
-                            border: `1px solid ${info.color}20`,
-                            color: info.color,
-                            fontFamily: 'var(--font-mono)',
+                    <div className="flex items-center gap-1">
+                      {selectedModel.capabilities.map(cap => (
+                        <CapabilityBadge key={cap} cap={cap} />
+                      ))}
+                    </div>
                           }} title={info.label}>
                             <Icon className="w-2.5 h-2.5" />
                           </span>
