@@ -63,7 +63,7 @@ function AvatarScene({ audioData, isListening }: Props) {
         distance={6}
       />
 
-      <ambientLight intensity={0.25} color="#88aacc" />
+      <ambientLight intensity={0.12} color="#88aacc" />
 
       <AvatarHead audioData={audioData} isListening={isListening} />
       <WaveformRing audioData={audioData} isListening={isListening} />
