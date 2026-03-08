@@ -1,32 +1,37 @@
-import { useAudioAnalyzer } from '@/hooks/useAudioAnalyzer';
 import { useWebLLM } from '@/hooks/useWebLLM';
 import { useKokoroTTS } from '@/hooks/useKokoroTTS';
 import SVGAvatar from '@/components/SVGAvatar';
 import AudioVisualizer from '@/components/AudioVisualizer';
 import ChatBox from '@/components/ChatBox';
-import { Mic, MicOff } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import type { AudioData } from '@/hooks/useAudioAnalyzer';
+
+const emptyAudioData: AudioData = {
+  volume: 0, bass: 0, mid: 0, treble: 0, frequencies: null, waveform: null,
+};
 
 const Index = () => {
-  const { isListening, audioData: micAudioData, startListening, stopListening } = useAudioAnalyzer();
   const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, initEngine, sendMessage, clearMessages } = useWebLLM();
   const tts = useKokoroTTS();
   const prevMsgCountRef = useRef(messages.length);
+  const wasGeneratingRef = useRef(false);
 
-  // Auto-speak new assistant messages
+  // Auto-speak when assistant message finishes generating
   useEffect(() => {
-    if (messages.length > prevMsgCountRef.current && !isGenerating) {
+    // Detect transition from generating to not generating
+    if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
-      if (lastMsg?.role === 'assistant' && lastMsg.content && tts.ttsEnabled && tts.isLoaded) {
+      if (lastMsg?.role === 'assistant' && lastMsg.content) {
+        console.log('LLM finished, triggering TTS for:', lastMsg.content.substring(0, 50));
         tts.speak(lastMsg.content);
       }
     }
-    prevMsgCountRef.current = messages.length;
-  }, [messages, isGenerating, tts.ttsEnabled, tts.isLoaded]);
+    wasGeneratingRef.current = isGenerating;
+  }, [isGenerating, messages, tts.speak]);
 
-  // Merge audio: TTS takes priority, then mic
-  const activeAudioData = tts.isSpeaking ? tts.audioData : micAudioData;
-  const isActive = tts.isSpeaking || isListening;
+  // Audio data from TTS for avatar
+  const activeAudioData = tts.isSpeaking ? tts.audioData : emptyAudioData;
+  const isActive = tts.isSpeaking;
 
   return (
     <div className="relative w-screen h-screen overflow-hidden select-none" style={{ background: 'hsl(220 50% 4%)' }}>
@@ -50,7 +55,7 @@ const Index = () => {
             }}
           />
           <p className="text-[10px] tracking-[0.25em]" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(210 15% 45%)' }}>
-            {tts.isSpeaking ? 'SPEAKING — TTS ACTIVE' : isListening ? 'ACTIVE — PROCESSING AUDIO' : 'STANDBY — AWAITING INPUT'}
+            {tts.isSpeaking ? 'SPEAKING — TTS ACTIVE' : isGenerating ? 'THINKING — GENERATING' : 'STANDBY — AWAITING INPUT'}
           </p>
         </div>
       </div>
@@ -82,34 +87,7 @@ const Index = () => {
       {/* Bottom gradient */}
       <div className="absolute bottom-0 inset-x-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to top, hsla(220, 50%, 4%, 0.9), transparent)' }} />
 
-      {/* Mic button */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-        <button
-          onClick={isListening ? stopListening : startListening}
-          className="group relative flex items-center justify-center w-14 h-14 rounded-full cursor-pointer transition-all duration-500 outline-none"
-          style={{
-            background: isListening
-              ? 'radial-gradient(circle, hsla(190, 100%, 55%, 0.15), transparent)'
-              : 'hsla(210, 20%, 20%, 0.5)',
-            border: `1px solid ${isListening ? 'hsla(190, 100%, 55%, 0.4)' : 'hsla(210, 15%, 30%, 0.5)'}`,
-            boxShadow: isListening ? '0 0 20px hsla(190, 100%, 55%, 0.2)' : 'none',
-          }}
-        >
-          {isListening ? (
-            <MicOff className="w-5 h-5" style={{ color: 'hsl(190 100% 55%)' }} />
-          ) : (
-            <Mic className="w-5 h-5" style={{ color: 'hsl(210 15% 50%)' }} />
-          )}
-          {isListening && (
-            <span className="absolute inset-0 rounded-full animate-ping" style={{ border: '1px solid hsla(190, 100%, 55%, 0.15)' }} />
-          )}
-        </button>
-        <p className="text-center text-[10px] mt-2 tracking-[0.2em]" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(210 15% 40%)' }}>
-          {isListening ? 'TAP TO STOP' : 'TAP TO SPEAK'}
-        </p>
-      </div>
-
-      {/* Stats */}
+      {/* Stats - shown when TTS speaking */}
       {isActive && (
         <div className="absolute bottom-10 left-5 flex flex-col gap-1.5 text-left z-10" style={{ fontFamily: 'var(--font-mono)' }}>
           {[
