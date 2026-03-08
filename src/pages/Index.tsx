@@ -12,6 +12,13 @@ const emptyAudioData: AudioData = {
   volume: 0, bass: 0, mid: 0, treble: 0, frequencies: null, waveform: null,
 };
 
+const COOL_ACTIONS: AvatarAction[] = [
+  'backflip', 'frontflip', 'spin', 'dance', 'breakdance', 'robot_dance',
+  'moonwalk', 'disco', 'cartwheel', 'hadouken', 'kamehameha', 'super_saiyan',
+  'barrel_roll', 'matrix_dodge', 'explode', 'teleport', 'glitch', 'power_up',
+  'lightning', 'tornado', 'rainbow', 'helicopter', 'corkscrew', 'moonjump',
+];
+
 const Index = () => {
   const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, lastStats, settings, initEngine, sendMessage, clearMessages, setMessages, updateSettings } = useWebLLM();
   const tts = useKokoroTTS();
@@ -43,6 +50,10 @@ const Index = () => {
     if (detected) return detected;
 
     const lower = text.toLowerCase();
+    // "do something cool/random/fun" → pick a random cool action
+    if (/something (cool|random|fun|crazy|awesome|wild|sick|epic)|random (animation|action|move|trick)|surprise me|show me something/i.test(lower)) {
+      return COOL_ACTIONS[Math.floor(Math.random() * COOL_ACTIONS.length)];
+    }
     if (lower.includes('back flip') || lower.includes('backflip') || lower.includes('flip')) return 'backflip';
     if (lower.includes('explod') || lower.includes('boom')) return 'explode';
     if (lower.includes('spin') || lower.includes('rotate')) return 'spin';
@@ -64,16 +75,21 @@ const Index = () => {
   }, []);
 
   // Auto-speak and detect actions when assistant message finishes
+  // Add a brief "Thinking" pause so the status dot shows yellow before TTS starts
   useEffect(() => {
     if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === 'assistant' && lastMsg.content) {
-        tts.speak(lastMsg.content);
-        const userMsg = messages[messages.length - 2];
-        const actionFromUser = userMsg ? detectActionRobust(userMsg.content) : null;
-        const actionFromAssistant = detectActionRobust(lastMsg.content);
-        const action = actionFromUser || actionFromAssistant || pickAmbientAction();
-        triggerActionSafely(action);
+        // Small delay so user sees "Thinking" → "Speaking" transition
+        const delay = setTimeout(() => {
+          tts.speak(lastMsg.content);
+          const userMsg = messages[messages.length - 2];
+          const actionFromUser = userMsg ? detectActionRobust(userMsg.content) : null;
+          const actionFromAssistant = detectActionRobust(lastMsg.content);
+          const action = actionFromUser || actionFromAssistant || pickAmbientAction();
+          triggerActionSafely(action);
+        }, 400);
+        return () => clearTimeout(delay);
       }
     }
     wasGeneratingRef.current = isGenerating;
