@@ -18,7 +18,6 @@ export function useWebLLM() {
   const initEngine = useCallback(async (modelId: string) => {
     if (isLoading) return;
 
-    // If switching models, reset
     if (engineRef.current) {
       engineRef.current = null;
       setIsLoaded(false);
@@ -110,5 +109,6 @@ export function useWebLLM() {
     initEngine,
     sendMessage,
     clearMessages,
+    setMessages,
   };
 }

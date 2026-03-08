@@ -1,8 +1,10 @@
 import { useWebLLM } from '@/hooks/useWebLLM';
 import { useKokoroTTS } from '@/hooks/useKokoroTTS';
+import { useChatHistory } from '@/hooks/useChatHistory';
 import SVGAvatar from '@/components/SVGAvatar';
 import ChatBox from '@/components/ChatBox';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
+import { Plus, MessageSquare, Trash2 } from 'lucide-react';
 import type { AudioData } from '@/hooks/useAudioAnalyzer';
 
 const emptyAudioData: AudioData = {
@@ -10,8 +12,9 @@ const emptyAudioData: AudioData = {
 };
 
 const Index = () => {
-  const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, initEngine, sendMessage, clearMessages } = useWebLLM();
+  const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, initEngine, sendMessage, clearMessages, setMessages } = useWebLLM();
   const tts = useKokoroTTS();
+  const history = useChatHistory();
   const wasGeneratingRef = useRef(false);
   const ttsInitStarted = useRef(false);
 
@@ -22,6 +25,13 @@ const Index = () => {
       tts.initTTS();
     }
   }, []);
+
+  // Sync messages to active session
+  useEffect(() => {
+    if (history.activeSessionId && messages.length > 0) {
+      history.updateSession(history.activeSessionId, messages, currentModelId);
+    }
+  }, [messages, currentModelId]);
 
   // Auto-speak when assistant message finishes
   useEffect(() => {
@@ -34,101 +44,200 @@ const Index = () => {
     wasGeneratingRef.current = isGenerating;
   }, [isGenerating, messages, tts.speak]);
 
+  const handleSend = useCallback((text: string) => {
+    // Auto-create session on first message
+    if (!history.activeSessionId) {
+      history.createSession(currentModelId);
+    }
+    sendMessage(text);
+  }, [history.activeSessionId, currentModelId, sendMessage, history.createSession]);
+
+  const handleNewChat = useCallback(() => {
+    clearMessages();
+    history.setActiveSessionId(null);
+  }, [clearMessages, history.setActiveSessionId]);
+
+  const handleSwitchChat = useCallback((id: string) => {
+    const session = history.sessions.find(s => s.id === id);
+    if (session) {
+      history.switchSession(id);
+      setMessages(session.messages);
+    }
+  }, [history.sessions, history.switchSession, setMessages]);
+
   const activeAudioData = tts.isSpeaking ? tts.audioData : emptyAudioData;
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden select-none" style={{ background: 'hsl(220 50% 4%)' }}>
+    <div className="relative w-screen h-screen overflow-hidden select-none bg-background">
       {/* Subtle grid background */}
       <div className="absolute inset-0 opacity-[0.03]">
         <svg width="100%" height="100%">
           <defs>
             <pattern id="bgGrid" width="50" height="50" patternUnits="userSpaceOnUse">
-              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="hsl(190 80% 50%)" strokeWidth="0.5" />
+              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="hsl(var(--primary))" strokeWidth="0.5" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#bgGrid)" />
         </svg>
       </div>
 
-      {/* Streamer-style avatar - top left */}
+      {/* Left sidebar */}
       <div
-        className="absolute top-4 left-4 z-30 rounded-2xl overflow-hidden"
+        className="absolute top-0 left-0 bottom-0 z-30 flex flex-col"
         style={{
-          width: '220px',
-          height: '220px',
-          background: 'hsla(215, 35%, 6%, 0.9)',
-          border: '1px solid hsla(190, 80%, 40%, 0.2)',
-          boxShadow: '0 0 40px hsla(190, 100%, 50%, 0.06), 0 8px 32px hsla(220, 50%, 2%, 0.6)',
+          width: '240px',
+          background: 'hsla(215, 35%, 5%, 0.98)',
+          borderRight: '1px solid hsl(var(--border))',
         }}
       >
-        <div className="w-full h-full relative">
-          <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} />
+        {/* Avatar section */}
+        <div className="p-3 shrink-0">
+          <div
+            className="rounded-xl overflow-hidden relative"
+            style={{
+              height: '200px',
+              background: 'hsla(215, 35%, 6%, 0.9)',
+              border: '1px solid hsla(190, 80%, 40%, 0.2)',
+              boxShadow: '0 0 40px hsla(190, 100%, 50%, 0.06)',
+            }}
+          >
+            <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} />
 
-          {/* Status dot overlay */}
-          <div className="absolute bottom-2 left-2 flex items-center gap-1.5" style={{ fontFamily: 'var(--font-mono)' }}>
-            <div
-              className="w-1.5 h-1.5 rounded-full transition-all duration-300"
-              style={{
-                background: tts.isSpeaking ? 'hsl(160 100% 55%)' : isGenerating ? 'hsl(45 100% 55%)' : 'hsl(210 15% 35%)',
-                boxShadow: tts.isSpeaking ? '0 0 8px hsl(160 100% 55%)' : isGenerating ? '0 0 8px hsl(45 100% 55%)' : 'none',
-              }}
-            />
-            <span className="text-[7px] tracking-[0.15em] uppercase" style={{
-              color: tts.isSpeaking ? 'hsl(160 70% 55%)' : isGenerating ? 'hsl(45 80% 55%)' : 'hsl(210 15% 35%)',
-            }}>
-              {tts.isSpeaking ? 'Speaking' : isGenerating ? 'Thinking' : 'Standby'}
+            {/* Status dot */}
+            <div className="absolute bottom-2 left-2 flex items-center gap-1.5" style={{ fontFamily: 'var(--font-mono)' }}>
+              <div
+                className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                style={{
+                  background: tts.isSpeaking ? 'hsl(160 100% 55%)' : isGenerating ? 'hsl(45 100% 55%)' : 'hsl(var(--muted-foreground))',
+                  boxShadow: tts.isSpeaking ? '0 0 8px hsl(160 100% 55%)' : isGenerating ? '0 0 8px hsl(45 100% 55%)' : 'none',
+                }}
+              />
+              <span className="text-[7px] tracking-[0.15em] uppercase" style={{
+                color: tts.isSpeaking ? 'hsl(160 70% 55%)' : isGenerating ? 'hsl(45 80% 55%)' : 'hsl(var(--muted-foreground))',
+              }}>
+                {tts.isSpeaking ? 'Speaking' : isGenerating ? 'Thinking' : 'Standby'}
+              </span>
+            </div>
+
+            {/* System badges */}
+            <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
+              <span className="text-[8px] tracking-[0.2em] uppercase font-medium text-primary" style={{ fontFamily: 'var(--font-mono)' }}>
+                Neural
+              </span>
+              <div className="flex items-center gap-1">
+                {[
+                  { label: 'LLM', ready: isLoaded, loading: isLoading },
+                  { label: 'TTS', ready: tts.isLoaded, loading: tts.isLoading },
+                ].map(({ label, ready, loading }) => (
+                  <span
+                    key={label}
+                    className="text-[6px] px-1 py-px rounded tracking-wider"
+                    style={{
+                      background: ready ? 'hsla(160, 100%, 50%, 0.1)' : loading ? 'hsla(45, 100%, 55%, 0.1)' : 'hsla(210, 15%, 30%, 0.2)',
+                      border: `1px solid ${ready ? 'hsla(160, 100%, 50%, 0.2)' : loading ? 'hsla(45, 100%, 55%, 0.2)' : 'hsla(210, 15%, 30%, 0.1)'}`,
+                      color: ready ? 'hsl(160 80% 55%)' : loading ? 'hsl(45 80% 55%)' : 'hsl(var(--muted-foreground))',
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Audio bars when speaking */}
+        {tts.isSpeaking && (
+          <div className="px-3 pb-2 flex flex-col gap-1 shrink-0" style={{ fontFamily: 'var(--font-mono)' }}>
+            {[
+              { label: 'VOL', value: activeAudioData.volume, color: 'hsl(var(--primary))' },
+              { label: 'BASS', value: activeAudioData.bass, color: 'hsl(var(--accent))' },
+              { label: 'MID', value: activeAudioData.mid, color: 'hsl(var(--secondary))' },
+              { label: 'HIGH', value: activeAudioData.treble, color: 'hsl(160 80% 50%)' },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="flex items-center gap-1.5">
+                <span className="text-[7px] tracking-wider w-6 text-right text-muted-foreground">{label}</span>
+                <div className="flex-1 h-[3px] rounded-full overflow-hidden bg-muted">
+                  <div className="h-full rounded-full transition-all duration-75" style={{ width: `${value * 100}%`, background: color, boxShadow: value > 0.3 ? `0 0 6px ${color}` : 'none' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* New Chat button */}
+        <div className="px-3 py-2 shrink-0">
+          <button
+            onClick={handleNewChat}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all hover:scale-[1.01] active:scale-[0.99]"
+            style={{
+              background: 'hsla(190, 100%, 55%, 0.06)',
+              border: '1px solid hsla(190, 100%, 55%, 0.15)',
+              color: 'hsl(var(--primary))',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span className="text-[10px] tracking-wider uppercase">New Chat</span>
+          </button>
+        </div>
+
+        {/* Chat history */}
+        <div className="flex-1 overflow-y-auto px-3 pb-3" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.15) transparent' }}>
+          <div className="flex items-center gap-2 py-2">
+            <span className="text-[8px] tracking-[0.2em] uppercase text-muted-foreground" style={{ fontFamily: 'var(--font-mono)' }}>
+              History
             </span>
+            <div className="flex-1 h-px bg-border" />
           </div>
 
-          {/* Name label */}
-          <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
-            <span className="text-[8px] tracking-[0.2em] uppercase font-medium" style={{ color: 'hsl(190 60% 55%)', fontFamily: 'var(--font-mono)' }}>
-              Neural
-            </span>
-            <div className="flex items-center gap-1">
-              {[
-                { label: 'LLM', ready: isLoaded, loading: isLoading },
-                { label: 'TTS', ready: tts.isLoaded, loading: tts.isLoading },
-              ].map(({ label, ready, loading }) => (
-                <span
-                  key={label}
-                  className="text-[6px] px-1 py-px rounded tracking-wider"
+          {history.sessions.length === 0 && (
+            <p className="text-[9px] text-muted-foreground text-center py-4" style={{ fontFamily: 'var(--font-mono)' }}>
+              No conversations yet
+            </p>
+          )}
+
+          <div className="space-y-0.5">
+            {history.sessions.map((session) => {
+              const isActive = session.id === history.activeSessionId;
+              return (
+                <div
+                  key={session.id}
+                  className="group flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer transition-all"
                   style={{
-                    background: ready ? 'hsla(160, 100%, 50%, 0.1)' : loading ? 'hsla(45, 100%, 55%, 0.1)' : 'hsla(210, 15%, 30%, 0.2)',
-                    border: `1px solid ${ready ? 'hsla(160, 100%, 50%, 0.2)' : loading ? 'hsla(45, 100%, 55%, 0.2)' : 'hsla(210, 15%, 30%, 0.1)'}`,
-                    color: ready ? 'hsl(160 80% 55%)' : loading ? 'hsl(45 80% 55%)' : 'hsl(210 15% 30%)',
-                    fontFamily: 'var(--font-mono)',
+                    background: isActive ? 'hsla(190, 100%, 55%, 0.06)' : 'transparent',
+                    border: isActive ? '1px solid hsla(190, 100%, 55%, 0.1)' : '1px solid transparent',
                   }}
+                  onClick={() => handleSwitchChat(session.id)}
                 >
-                  {label}
-                </span>
-              ))}
-            </div>
+                  <MessageSquare className="w-3 h-3 shrink-0" style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] truncate" style={{
+                      color: isActive ? 'hsl(190 60% 65%)' : 'hsl(210 10% 55%)',
+                      fontFamily: 'var(--font-mono)',
+                    }}>
+                      {session.title}
+                    </p>
+                    <p className="text-[7px] text-muted-foreground" style={{ fontFamily: 'var(--font-mono)' }}>
+                      {session.messages.length} msgs
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); history.deleteSession(session.id); }}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded transition-all hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-2.5 h-2.5 text-muted-foreground" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Audio level bars under avatar when speaking */}
-      {tts.isSpeaking && (
-        <div className="absolute top-[240px] left-4 z-20 flex flex-col gap-1" style={{ width: '220px', fontFamily: 'var(--font-mono)' }}>
-          {[
-            { label: 'VOL', value: activeAudioData.volume, color: 'hsl(190 100% 55%)' },
-            { label: 'BASS', value: activeAudioData.bass, color: 'hsl(340 80% 55%)' },
-            { label: 'MID', value: activeAudioData.mid, color: 'hsl(260 70% 60%)' },
-            { label: 'HIGH', value: activeAudioData.treble, color: 'hsl(160 80% 50%)' },
-          ].map(({ label, value, color }) => (
-            <div key={label} className="flex items-center gap-1.5">
-              <span className="text-[7px] tracking-wider w-6 text-right" style={{ color: 'hsl(210 15% 35%)' }}>{label}</span>
-              <div className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: 'hsla(210, 15%, 15%, 0.6)' }}>
-                <div className="h-full rounded-full transition-all duration-75" style={{ width: `${value * 100}%`, background: color, boxShadow: value > 0.3 ? `0 0 6px ${color}` : 'none' }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Fullscreen chat */}
-      <div className="absolute inset-0 z-10 flex flex-col" style={{ paddingLeft: '248px', paddingTop: '16px', paddingRight: '16px', paddingBottom: '16px' }}>
+      {/* Main chat area */}
+      <div className="absolute inset-0 z-10 flex flex-col" style={{ paddingLeft: '240px' }}>
         <ChatBox
           isLoaded={isLoaded}
           isLoading={isLoading}
@@ -141,8 +250,8 @@ const Index = () => {
           ttsLoaded={tts.isLoaded}
           ttsSpeaking={tts.isSpeaking}
           ttsProgress={tts.loadProgress}
-          onSend={sendMessage}
-          onClear={clearMessages}
+          onSend={handleSend}
+          onClear={handleNewChat}
           onInit={initEngine}
           onToggleTTS={tts.toggleTTS}
         />
