@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { Environment, ContactShadows } from '@react-three/drei';
-import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import AvatarHead from './AvatarHead';
 import ParticleField from './ParticleField';
@@ -26,7 +26,7 @@ function AvatarScene({ audioData, isListening }: Props) {
       <directionalLight position={[3, 5, 3]} intensity={2.2} color="#ffe4cc" castShadow />
       <directionalLight position={[-4, 2, 1]} intensity={0.8} color="#6ec8f0" />
       
-      {/* Rim light - strong cyan backlight */}
+      {/* Rim light */}
       <spotLight
         position={[0, 4, -4]}
         intensity={isListening ? 4 + audioData.volume * 8 : 2.5}
@@ -36,7 +36,7 @@ function AvatarScene({ audioData, isListening }: Props) {
         castShadow
       />
 
-      {/* Bottom accent - magenta */}
+      {/* Bottom accent */}
       <pointLight
         position={[0, -3, 1.5]}
         intensity={isListening ? 1.2 + audioData.bass * 4 : 0.5}
@@ -82,10 +82,6 @@ function AvatarScene({ audioData, isListening }: Props) {
           luminanceThreshold={0.3}
           luminanceSmoothing={0.9}
           mipmapBlur
-        />
-        <ChromaticAberration
-          blendFunction={BlendFunction.NORMAL}
-          offset={[isListening ? 0.001 + audioData.bass * 0.003 : 0.0005, isListening ? 0.001 + audioData.bass * 0.003 : 0.0005] as any}
         />
         <Vignette
           offset={0.3}

@@ -9,8 +9,8 @@ interface Props {
 }
 
 function WaveformRing({ audioData, isListening }: Props) {
-  const ringRef = useRef<THREE.Line>(null);
-  const ring2Ref = useRef<THREE.Line>(null);
+  const ringRef = useRef<any>(null);
+  const ring2Ref = useRef<any>(null);
   const segments = 128;
 
   const geometry = useMemo(() => {
@@ -63,6 +63,7 @@ function WaveformRing({ audioData, isListening }: Props) {
 
   return (
     <group position={[0, 0.15, 0]}>
+      {/* @ts-ignore */}
       <line ref={ringRef} geometry={geometry}>
         <lineBasicMaterial
           color="#00d4ff"
@@ -70,7 +71,9 @@ function WaveformRing({ audioData, isListening }: Props) {
           opacity={isListening ? 0.6 + audioData.volume * 0.4 : 0.08}
           blending={THREE.AdditiveBlending}
         />
+      {/* @ts-ignore */}
       </line>
+      {/* @ts-ignore */}
       <line ref={ring2Ref} geometry={geometry2}>
         <lineBasicMaterial
           color="#ff3388"
@@ -78,6 +81,7 @@ function WaveformRing({ audioData, isListening }: Props) {
           opacity={isListening ? 0.3 + audioData.treble * 0.4 : 0.04}
           blending={THREE.AdditiveBlending}
         />
+      {/* @ts-ignore */}
       </line>
     </group>
   );
