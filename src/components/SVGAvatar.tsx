@@ -257,7 +257,7 @@ function SVGAvatar({ audioData, isListening }: Props) {
         </g>
 
         {/* === WAVEFORM RING (outer) === */}
-        {isListening && s.waveform && (
+        {isListening && audioData.waveform && (
           <g opacity={0.2 + s.volume * 0.3}>
             <circle cx="250" cy="280" r={185 + s.volume * 15} fill="none"
               stroke="hsl(190 100% 55%)" strokeWidth="0.8" opacity="0.3"
