@@ -176,13 +176,13 @@ const Index = () => {
             {/* Status dot */}
             <div className="absolute bottom-2 left-2 flex items-center gap-1.5" style={mono}>
               <div
-                className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                className="w-2 h-2 rounded-full transition-all duration-300"
                 style={{
                   background: tts.isSpeaking ? 'hsl(160 100% 55%)' : isGenerating ? 'hsl(45 100% 55%)' : 'hsl(var(--muted-foreground))',
                   boxShadow: tts.isSpeaking ? '0 0 8px hsl(160 100% 55%)' : isGenerating ? '0 0 8px hsl(45 100% 55%)' : 'none',
                 }}
               />
-              <span className="text-[7px] tracking-[0.15em] uppercase" style={{
+              <span className="text-[9px] tracking-[0.12em] uppercase" style={{
                 color: tts.isSpeaking ? 'hsl(160 70% 55%)' : isGenerating ? 'hsl(45 80% 55%)' : 'hsl(var(--muted-foreground))',
               }}>
                 {tts.isSpeaking ? 'Speaking' : isGenerating ? 'Thinking' : 'Standby'}
