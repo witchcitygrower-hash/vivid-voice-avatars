@@ -140,11 +140,12 @@ function SVGAvatar({ audioData, isListening }: Props) {
           <g opacity={isListening ? 0.4 + s.volume * 0.5 : 0.08}>
             {Array.from({ length: ringDots }).map((_, i) => {
               const angle = (i / ringDots) * Math.PI * 2 + t * 0.3;
-              const baseR = 145 + (s.frequencies ? (s.frequencies[i * 4] / 255) * 30 : 0);
+              const freqVal = audioData.frequencies ? (audioData.frequencies[i * 4] / 255) : 0;
+              const baseR = 145 + freqVal * 30;
               const r = baseR + Math.sin(t * 2 + i * 0.4) * 3;
               const x = Math.cos(angle) * r;
               const y = Math.sin(angle) * r;
-              const dotSize = 1.5 + (s.frequencies ? (s.frequencies[i * 4] / 255) * 3 : 0);
+              const dotSize = 1.5 + freqVal * 3;
               return (
                 <circle key={i} cx={x} cy={y} r={dotSize} fill="hsl(190 100% 60%)" opacity={0.5} />
               );
