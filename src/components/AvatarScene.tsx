@@ -23,10 +23,10 @@ function AvatarScene({ audioData, isListening }: Props) {
       <fog attach="fog" args={['#080c14', 5, 14]} />
 
       {/* Key light - warm from top right */}
-      <directionalLight position={[3, 5, 4]} intensity={3} color="#fff5e6" castShadow />
+      <directionalLight position={[3, 5, 4]} intensity={1.8} color="#fff5e6" castShadow />
       
       {/* Fill light - cool from left */}
-      <directionalLight position={[-4, 2, 2]} intensity={1.5} color="#b0d4ff" />
+      <directionalLight position={[-4, 2, 2]} intensity={0.8} color="#b0d4ff" />
 
       {/* Back rim light - strong cyan */}
       <spotLight
