@@ -159,6 +159,7 @@ function ChatBox({
   const [input, setInput] = useState('');
   const [selectedModelId, setSelectedModelId] = useState(AVAILABLE_MODELS[0].id);
   const [showModelPicker, setShowModelPicker] = useState(false);
+  const [showAllModels, setShowAllModels] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -348,11 +349,13 @@ function ChatBox({
               </button>
 
               {showModelPicker && (
-                <div className="space-y-0.5 max-h-[260px] overflow-y-auto rounded-xl p-1.5" style={{
+                <div className="space-y-0.5 max-h-[320px] overflow-y-auto rounded-xl p-1.5" style={{
                   background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))',
                   scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.15) transparent',
                 }}>
-                  {AVAILABLE_MODELS.map((model) => {
+                  {AVAILABLE_MODELS
+                    .filter(m => showAllModels || m.featured)
+                    .map((model) => {
                     const sel = selectedModelId === model.id;
                     return (
                       <button
@@ -389,6 +392,18 @@ function ChatBox({
                       </button>
                     );
                   })}
+                  <button
+                    onClick={() => setShowAllModels(!showAllModels)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-medium transition-all"
+                    style={{
+                      color: 'hsl(var(--primary))',
+                      background: 'hsla(190, 100%, 55%, 0.03)',
+                      border: '1px solid hsla(190, 100%, 55%, 0.08)',
+                      ...mono,
+                    }}
+                  >
+                    {showAllModels ? '− Show less' : `+ ${AVAILABLE_MODELS.filter(m => !m.featured).length} more models`}
+                  </button>
                 </div>
               )}
 
