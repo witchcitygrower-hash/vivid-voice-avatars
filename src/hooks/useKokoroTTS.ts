@@ -19,6 +19,8 @@ export function useKokoroTTS() {
   const isSpeakingRef = useRef(false);
   const ttsEnabledRef = useRef(true);
   const isLoadingRef = useRef(false);
+  const queueRef = useRef<{ samples: Float32Array; sampleRate: number }[]>([]);
+  const isPlayingQueueRef = useRef(false);
 
   const initTTS = useCallback(async () => {
     if (ttsRef.current || isLoadingRef.current) return;
@@ -39,7 +41,7 @@ export function useKokoroTTS() {
       setLoadProgress('');
       console.log('[TTS] Model loaded and ready!');
 
-      // Warm up in background after a short delay so UI stays responsive
+      // Background warm-up
       setTimeout(async () => {
         try {
           await tts.generate('Hi.', { voice: 'af_heart' });
@@ -95,6 +97,8 @@ export function useKokoroTTS() {
     window.speechSynthesis?.cancel();
     cancelAnimationFrame(rafRef.current);
     sourceRef.current = null;
+    queueRef.current = [];
+    isPlayingQueueRef.current = false;
   }, []);
 
   const resetState = useCallback(() => {
@@ -136,45 +140,66 @@ export function useKokoroTTS() {
     window.speechSynthesis.speak(utterance);
   }, [resetState]);
 
-  const playAudio = useCallback((samples: Float32Array, sampleRate: number) => {
-    const ctx = audioContextRef.current ?? new AudioContext();
-    audioContextRef.current = ctx;
+  // Play a single audio buffer, returns a promise that resolves when done
+  const playAudioChunk = useCallback((samples: Float32Array, sampleRate: number): Promise<void> => {
+    return new Promise((resolve) => {
+      const ctx = audioContextRef.current ?? new AudioContext();
+      audioContextRef.current = ctx;
 
-    if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state === 'suspended') ctx.resume();
 
-    const buffer = ctx.createBuffer(1, samples.length, sampleRate);
-    buffer.getChannelData(0).set(samples);
+      const buffer = ctx.createBuffer(1, samples.length, sampleRate);
+      buffer.getChannelData(0).set(samples);
 
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
 
-    const analyzer = ctx.createAnalyser();
-    analyzer.fftSize = 512;
-    analyzer.smoothingTimeConstant = 0.8;
-    analyzerRef.current = analyzer;
+      const analyzer = ctx.createAnalyser();
+      analyzer.fftSize = 512;
+      analyzer.smoothingTimeConstant = 0.8;
+      analyzerRef.current = analyzer;
 
-    source.connect(analyzer);
-    analyzer.connect(ctx.destination);
+      source.connect(analyzer);
+      analyzer.connect(ctx.destination);
 
-    source.onended = () => {
+      source.onended = () => {
+        sourceRef.current = null;
+        resolve();
+      };
+
+      sourceRef.current = source;
+      source.start();
+
+      if (!rafRef.current) {
+        analyzeLoop();
+      }
+    });
+  }, [analyzeLoop]);
+
+  // Process queue of audio chunks sequentially
+  const processQueue = useCallback(async () => {
+    if (isPlayingQueueRef.current) return;
+    isPlayingQueueRef.current = true;
+
+    while (queueRef.current.length > 0 && isSpeakingRef.current) {
+      const chunk = queueRef.current.shift()!;
+      await playAudioChunk(chunk.samples, chunk.sampleRate);
+    }
+
+    isPlayingQueueRef.current = false;
+    if (queueRef.current.length === 0) {
       cancelAnimationFrame(rafRef.current);
-      sourceRef.current = null;
+      rafRef.current = 0;
       resetState();
-      console.log('[TTS] Playback ended');
-    };
-
-    sourceRef.current = source;
-    source.start();
-    analyzeLoop();
-    console.log('[TTS] Playback started');
-  }, [analyzeLoop, resetState]);
+      console.log('[TTS] All chunks finished');
+    }
+  }, [playAudioChunk, resetState]);
 
   const speak = useCallback(async (text: string) => {
     console.log('[TTS] speak() called. loaded:', !!ttsRef.current, 'speaking:', isSpeakingRef.current, 'enabled:', ttsEnabledRef.current);
 
     if (isSpeakingRef.current || !ttsEnabledRef.current) return;
 
-    // If Kokoro not loaded, use browser fallback (instant, no lag)
     if (!ttsRef.current) {
       speakFallback(text);
       return;
@@ -182,28 +207,52 @@ export function useKokoroTTS() {
 
     isSpeakingRef.current = true;
     setIsSpeaking(true);
+    queueRef.current = [];
 
-    // Yield to the event loop so UI updates before heavy inference
-    await new Promise(r => setTimeout(r, 16));
+    await new Promise(r => setTimeout(r, 8));
 
     try {
-      // Truncate to keep generation fast - 300 chars is ~20s of speech
-      const truncated = text.length > 300 ? text.substring(0, 300) + '...' : text;
+      // Truncate to keep generation fast
+      const truncated = text.length > 400 ? text.substring(0, 400) + '...' : text;
 
-      const rawAudio = await ttsRef.current.generate(truncated, { voice: 'af_heart' });
+      // Try streaming approach - split text into sentences for faster first-audio
+      const sentences = truncated.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [truncated];
+      
+      console.log(`[TTS] Generating ${sentences.length} chunks via streaming`);
 
-      const samples: Float32Array = rawAudio.audio ?? rawAudio.waveform ?? rawAudio.data;
-      const sampleRate: number = rawAudio.sampling_rate ?? rawAudio.sampleRate ?? 24000;
+      let firstChunkPlayed = false;
 
-      if (!samples || samples.length === 0) throw new Error('No audio data');
+      for (const sentence of sentences) {
+        const trimmed = sentence.trim();
+        if (!trimmed || !isSpeakingRef.current) break;
 
-      playAudio(samples, sampleRate);
+        const rawAudio = await ttsRef.current.generate(trimmed, { voice: 'af_heart' });
+        const samples: Float32Array = rawAudio.audio ?? rawAudio.waveform ?? rawAudio.data;
+        const sampleRate: number = rawAudio.sampling_rate ?? rawAudio.sampleRate ?? 24000;
+
+        if (!samples || samples.length === 0) continue;
+
+        queueRef.current.push({ samples, sampleRate });
+
+        // Start playback as soon as first chunk is ready
+        if (!firstChunkPlayed) {
+          firstChunkPlayed = true;
+          console.log('[TTS] First chunk ready, starting playback');
+          processQueue(); // don't await - let it play while we generate more
+        }
+      }
+
+      // If nothing was generated
+      if (!firstChunkPlayed) {
+        throw new Error('No audio generated');
+      }
     } catch (e) {
       console.error('[TTS] Kokoro error, falling back:', e);
+      queueRef.current = [];
       resetState();
       speakFallback(text);
     }
-  }, [speakFallback, playAudio, resetState]);
+  }, [speakFallback, processQueue, resetState]);
 
   const stopSpeaking = useCallback(() => {
     stopCurrent();
