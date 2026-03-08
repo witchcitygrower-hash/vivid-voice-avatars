@@ -271,8 +271,8 @@ const Index = () => {
               ...mono,
             }}
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="text-[10px] tracking-wider uppercase">New Chat</span>
+            <Plus className="w-4 h-4" />
+            <span className="text-xs tracking-wider uppercase">New Chat</span>
           </button>
         </div>
 
