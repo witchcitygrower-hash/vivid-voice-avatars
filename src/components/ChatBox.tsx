@@ -108,17 +108,17 @@ function SettingsPanel({ settings, onUpdate, onClose }: { settings: ModelSetting
             <label className="text-[11px] tracking-wider uppercase text-muted-foreground" style={mono}>Max Tokens</label>
             <span className="text-[11px] text-primary" style={mono}>{settings.maxTokens}</span>
           </div>
-          <input
-            type="range" min="64" max="2048" step="64"
-            value={settings.maxTokens}
-            onChange={(e) => onUpdate({ maxTokens: parseInt(e.target.value) })}
-            className="w-full h-1 rounded-full appearance-none cursor-pointer"
-            style={{ background: `linear-gradient(to right, hsl(var(--primary)) ${(settings.maxTokens - 64) / (2048 - 64) * 100}%, hsl(var(--muted)) ${(settings.maxTokens - 64) / (2048 - 64) * 100}%)` }}
-          />
-          <div className="flex justify-between mt-1">
-            <span className="text-[9px] text-muted-foreground" style={mono}>Short</span>
-            <span className="text-[9px] text-muted-foreground" style={mono}>Long</span>
-          </div>
+            <input
+              type="range" min="64" max="160" step="16"
+              value={settings.maxTokens}
+              onChange={(e) => onUpdate({ maxTokens: parseInt(e.target.value) })}
+              className="w-full h-1 rounded-full appearance-none cursor-pointer"
+              style={{ background: `linear-gradient(to right, hsl(var(--primary)) ${(settings.maxTokens - 64) / (160 - 64) * 100}%, hsl(var(--muted)) ${(settings.maxTokens - 64) / (160 - 64) * 100}%)` }}
+            />
+            <div className="flex justify-between mt-1">
+              <span className="text-[9px] text-muted-foreground" style={mono}>Short</span>
+              <span className="text-[9px] text-muted-foreground" style={mono}>Capped</span>
+            </div>
         </div>
 
         {/* Top P */}
