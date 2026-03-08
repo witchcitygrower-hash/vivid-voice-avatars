@@ -75,16 +75,21 @@ const Index = () => {
   }, []);
 
   // Auto-speak and detect actions when assistant message finishes
+  // Add a brief "Thinking" pause so the status dot shows yellow before TTS starts
   useEffect(() => {
     if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === 'assistant' && lastMsg.content) {
-        tts.speak(lastMsg.content);
-        const userMsg = messages[messages.length - 2];
-        const actionFromUser = userMsg ? detectActionRobust(userMsg.content) : null;
-        const actionFromAssistant = detectActionRobust(lastMsg.content);
-        const action = actionFromUser || actionFromAssistant || pickAmbientAction();
-        triggerActionSafely(action);
+        // Small delay so user sees "Thinking" → "Speaking" transition
+        const delay = setTimeout(() => {
+          tts.speak(lastMsg.content);
+          const userMsg = messages[messages.length - 2];
+          const actionFromUser = userMsg ? detectActionRobust(userMsg.content) : null;
+          const actionFromAssistant = detectActionRobust(lastMsg.content);
+          const action = actionFromUser || actionFromAssistant || pickAmbientAction();
+          triggerActionSafely(action);
+        }, 400);
+        return () => clearTimeout(delay);
       }
     }
     wasGeneratingRef.current = isGenerating;
