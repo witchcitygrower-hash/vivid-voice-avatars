@@ -178,6 +178,7 @@ function ChatBox({
     if (!text || isGenerating || !isLoaded) return;
     onSend(text);
     setInput('');
+    requestAnimationFrame(() => inputRef.current?.focus());
   };
 
   const handleVoiceInput = useCallback(() => {
