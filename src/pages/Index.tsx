@@ -97,12 +97,8 @@ const Index = () => {
     if (!history.activeSessionId) {
       history.createSession(currentModelId);
     }
-    const userAction = detectActionRobust(text);
-    if (userAction) {
-      triggerActionSafely(userAction);
-    }
     sendMessage(text);
-  }, [history.activeSessionId, currentModelId, sendMessage, history.createSession, detectActionRobust, triggerActionSafely]);
+  }, [history.activeSessionId, currentModelId, sendMessage, history.createSession]);
 
   const handleNewChat = useCallback(() => {
     clearMessages();
