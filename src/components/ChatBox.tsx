@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Send, Trash2, Loader2, Volume2, VolumeX, Mic, MicOff, ChevronDown, Sparkles, Cpu, Zap, CircuitBoard, Settings2, MessageCircle, Clock, Hash, Gauge } from 'lucide-react';
+import { Send, Trash2, Loader2, Volume2, VolumeX, Mic, MicOff, ChevronDown, Sparkles, Cpu, Zap, CircuitBoard, Settings2, MessageCircle, Clock, Hash, Gauge, RefreshCw } from 'lucide-react';
 import type { ChatMessage, GenerationStats, ModelSettings } from '@/hooks/useWebLLM';
 import { AVAILABLE_MODELS } from '@/config/models';
 
@@ -32,23 +32,23 @@ function StatsBar({ stats, isGenerating }: { stats: GenerationStats | null; isGe
     <div className="flex items-center gap-4 px-5 py-1.5 shrink-0" style={{ borderTop: '1px solid hsl(var(--border))', background: 'hsla(215, 30%, 6%, 0.6)' }}>
       {isGenerating && !stats && (
         <div className="flex items-center gap-1.5">
-          <Loader2 className="w-2.5 h-2.5 animate-spin text-primary" />
-          <span className="text-[8px] text-primary tracking-wider" style={mono}>GENERATING</span>
+          <Loader2 className="w-3 h-3 animate-spin text-primary" />
+          <span className="text-[10px] text-primary tracking-wider" style={mono}>GENERATING</span>
         </div>
       )}
       {stats && (
         <>
           <div className="flex items-center gap-1" title="Tokens generated">
-            <Hash className="w-2.5 h-2.5 text-primary" style={{ filter: 'drop-shadow(0 0 3px hsla(190, 100%, 55%, 0.4))' }} />
-            <span className="text-[8px] text-muted-foreground" style={mono}>{stats.tokensGenerated} tokens</span>
+            <Hash className="w-3 h-3 text-primary" style={{ filter: 'drop-shadow(0 0 3px hsla(190, 100%, 55%, 0.4))' }} />
+            <span className="text-[10px] text-muted-foreground" style={mono}>{stats.tokensGenerated} tokens</span>
           </div>
           <div className="flex items-center gap-1" title="Speed">
-            <Gauge className="w-2.5 h-2.5" style={{ color: 'hsl(160 90% 50%)', filter: 'drop-shadow(0 0 3px hsla(160, 90%, 50%, 0.4))' }} />
-            <span className="text-[8px] text-muted-foreground" style={mono}>{stats.tokensPerSecond.toFixed(1)} tok/s</span>
+            <Gauge className="w-3 h-3" style={{ color: 'hsl(160 90% 50%)', filter: 'drop-shadow(0 0 3px hsla(160, 90%, 50%, 0.4))' }} />
+            <span className="text-[10px] text-muted-foreground" style={mono}>{stats.tokensPerSecond.toFixed(1)} tok/s</span>
           </div>
           <div className="flex items-center gap-1" title="Response time">
-            <Clock className="w-2.5 h-2.5" style={{ color: 'hsl(45 100% 55%)', filter: 'drop-shadow(0 0 3px hsla(45, 100%, 55%, 0.4))' }} />
-            <span className="text-[8px] text-muted-foreground" style={mono}>{(stats.totalTimeMs / 1000).toFixed(1)}s</span>
+            <Clock className="w-3 h-3" style={{ color: 'hsl(45 100% 55%)', filter: 'drop-shadow(0 0 3px hsla(45, 100%, 55%, 0.4))' }} />
+            <span className="text-[10px] text-muted-foreground" style={mono}>{(stats.totalTimeMs / 1000).toFixed(1)}s</span>
           </div>
         </>
       )}
@@ -64,21 +64,21 @@ function SettingsPanel({ settings, onUpdate, onClose }: { settings: ModelSetting
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Settings2 className="w-4 h-4 text-primary" />
-            <span className="text-xs font-semibold tracking-wider uppercase text-primary" style={mono}>Model Settings</span>
+            <span className="text-sm font-semibold tracking-wider uppercase text-primary" style={mono}>Model Settings</span>
           </div>
-          <button onClick={onClose} className="text-[10px] px-2 py-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" style={mono}>
+          <button onClick={onClose} className="text-xs px-2 py-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" style={mono}>
             CLOSE
           </button>
         </div>
 
         {/* System Prompt */}
         <div>
-          <label className="text-[9px] tracking-wider uppercase text-muted-foreground mb-1.5 block" style={mono}>System Prompt</label>
+          <label className="text-[11px] tracking-wider uppercase text-muted-foreground mb-1.5 block" style={mono}>System Prompt</label>
           <textarea
             value={settings.systemPrompt}
             onChange={(e) => onUpdate({ systemPrompt: e.target.value })}
             rows={3}
-            className="w-full bg-background text-[11px] text-foreground rounded-lg px-3 py-2 border border-border outline-none resize-none focus:border-primary/30 transition-colors"
+            className="w-full bg-background text-sm text-foreground rounded-lg px-3 py-2 border border-border outline-none resize-none focus:border-primary/30 transition-colors"
             style={mono}
           />
         </div>
@@ -86,8 +86,8 @@ function SettingsPanel({ settings, onUpdate, onClose }: { settings: ModelSetting
         {/* Temperature */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-[9px] tracking-wider uppercase text-muted-foreground" style={mono}>Temperature</label>
-            <span className="text-[9px] text-primary" style={mono}>{settings.temperature.toFixed(1)}</span>
+            <label className="text-[11px] tracking-wider uppercase text-muted-foreground" style={mono}>Temperature</label>
+            <span className="text-[11px] text-primary" style={mono}>{settings.temperature.toFixed(1)}</span>
           </div>
           <input
             type="range" min="0" max="2" step="0.1"
@@ -97,16 +97,16 @@ function SettingsPanel({ settings, onUpdate, onClose }: { settings: ModelSetting
             style={{ background: `linear-gradient(to right, hsl(var(--primary)) ${settings.temperature / 2 * 100}%, hsl(var(--muted)) ${settings.temperature / 2 * 100}%)` }}
           />
           <div className="flex justify-between mt-1">
-            <span className="text-[7px] text-muted-foreground" style={mono}>Precise</span>
-            <span className="text-[7px] text-muted-foreground" style={mono}>Creative</span>
+            <span className="text-[9px] text-muted-foreground" style={mono}>Precise</span>
+            <span className="text-[9px] text-muted-foreground" style={mono}>Creative</span>
           </div>
         </div>
 
         {/* Max Tokens */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-[9px] tracking-wider uppercase text-muted-foreground" style={mono}>Max Tokens</label>
-            <span className="text-[9px] text-primary" style={mono}>{settings.maxTokens}</span>
+            <label className="text-[11px] tracking-wider uppercase text-muted-foreground" style={mono}>Max Tokens</label>
+            <span className="text-[11px] text-primary" style={mono}>{settings.maxTokens}</span>
           </div>
           <input
             type="range" min="64" max="2048" step="64"
@@ -116,16 +116,16 @@ function SettingsPanel({ settings, onUpdate, onClose }: { settings: ModelSetting
             style={{ background: `linear-gradient(to right, hsl(var(--primary)) ${(settings.maxTokens - 64) / (2048 - 64) * 100}%, hsl(var(--muted)) ${(settings.maxTokens - 64) / (2048 - 64) * 100}%)` }}
           />
           <div className="flex justify-between mt-1">
-            <span className="text-[7px] text-muted-foreground" style={mono}>Short</span>
-            <span className="text-[7px] text-muted-foreground" style={mono}>Long</span>
+            <span className="text-[9px] text-muted-foreground" style={mono}>Short</span>
+            <span className="text-[9px] text-muted-foreground" style={mono}>Long</span>
           </div>
         </div>
 
         {/* Top P */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-[9px] tracking-wider uppercase text-muted-foreground" style={mono}>Top P</label>
-            <span className="text-[9px] text-primary" style={mono}>{settings.topP.toFixed(2)}</span>
+            <label className="text-[11px] tracking-wider uppercase text-muted-foreground" style={mono}>Top P</label>
+            <span className="text-[11px] text-primary" style={mono}>{settings.topP.toFixed(2)}</span>
           </div>
           <input
             type="range" min="0.1" max="1" step="0.05"
@@ -135,8 +135,8 @@ function SettingsPanel({ settings, onUpdate, onClose }: { settings: ModelSetting
             style={{ background: `linear-gradient(to right, hsl(var(--primary)) ${(settings.topP - 0.1) / 0.9 * 100}%, hsl(var(--muted)) ${(settings.topP - 0.1) / 0.9 * 100}%)` }}
           />
           <div className="flex justify-between mt-1">
-            <span className="text-[7px] text-muted-foreground" style={mono}>Focused</span>
-            <span className="text-[7px] text-muted-foreground" style={mono}>Diverse</span>
+            <span className="text-[9px] text-muted-foreground" style={mono}>Focused</span>
+            <span className="text-[9px] text-muted-foreground" style={mono}>Diverse</span>
           </div>
         </div>
       </div>
@@ -162,6 +162,7 @@ function ChatBox({
   const [showAllModels, setShowAllModels] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [wantsModelSwitch, setWantsModelSwitch] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -205,8 +206,15 @@ function ChatBox({
   const activeModel = AVAILABLE_MODELS.find(m => m.id === currentModelId);
   const mono = { fontFamily: 'var(--font-mono)' };
 
-  // Count words in conversation
   const totalWords = messages.reduce((sum, m) => sum + m.content.split(/\s+/).filter(Boolean).length, 0);
+
+  // Show model picker if not loaded or user wants to switch
+  const showModelSelection = (!isLoaded && !isLoading) || wantsModelSwitch;
+
+  const handleInitModel = (modelId: string) => {
+    setWantsModelSwitch(false);
+    onInit(modelId);
+  };
 
   return (
     <div className="relative flex flex-col h-full overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
@@ -217,72 +225,58 @@ function ChatBox({
 
       {/* Header */}
       <div
-        className="flex items-center justify-between px-5 py-3 shrink-0"
+        className="flex items-center justify-between px-5 py-2.5 shrink-0"
         style={{
           background: 'linear-gradient(180deg, hsla(215, 30%, 8%, 0.9), hsla(215, 30%, 6%, 0.4))',
           borderBottom: '1px solid hsl(var(--border))',
         }}
       >
         <div className="flex items-center gap-3">
-          <CircuitBoard className="w-4 h-4 text-primary" style={{ filter: 'drop-shadow(0 0 4px hsla(190, 100%, 55%, 0.4))' }} />
+          <CircuitBoard className="w-5 h-5 text-primary" style={{ filter: 'drop-shadow(0 0 4px hsla(190, 100%, 55%, 0.4))' }} />
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold tracking-[0.15em] uppercase text-primary">
+            <span className="text-sm font-semibold tracking-[0.12em] uppercase text-primary">
               Neural Chat
             </span>
-            {activeModel && (
-              <span className="text-[8px] px-1.5 py-0.5 rounded tracking-wider" style={{
-                background: 'hsla(190, 100%, 55%, 0.06)',
-                border: '1px solid hsla(190, 100%, 55%, 0.12)',
-                color: 'hsl(var(--primary))',
-                ...mono,
-              }}>
-                {activeModel.name} • {activeModel.params}
-              </span>
+            {activeModel && !wantsModelSwitch && (
+              <button
+                onClick={() => setWantsModelSwitch(true)}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md transition-all hover:bg-muted/50 group"
+                title="Change model"
+              >
+                <span className="text-[10px] px-1.5 py-0.5 rounded tracking-wider" style={{
+                  background: 'hsla(190, 100%, 55%, 0.06)',
+                  border: '1px solid hsla(190, 100%, 55%, 0.12)',
+                  color: 'hsl(var(--primary))',
+                  ...mono,
+                }}>
+                  {activeModel.name} • {activeModel.params}
+                </span>
+                <RefreshCw className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
             )}
-            {/* Feature badges */}
-            <div className="flex items-center gap-1">
-              <span className="inline-flex items-center gap-0.5 rounded-full" style={{
-                padding: '1px 5px', background: 'hsla(190 100% 55% / 0.08)', border: '1px solid hsla(190 100% 55% / 0.25)',
-                boxShadow: '0 0 6px hsla(190 100% 55% / 0.15)', color: 'hsl(190 100% 55%)', fontSize: '7px', ...mono,
-              }} title="Speech-to-Text Input">
-                <Mic style={{ width: 8, height: 8, filter: 'drop-shadow(0 0 3px hsla(190, 100%, 55%, 0.4))' }} />
-              </span>
-              <span className="inline-flex items-center gap-0.5 rounded-full" style={{
-                padding: '1px 5px', background: 'hsla(160 90% 50% / 0.08)', border: '1px solid hsla(160 90% 50% / 0.25)',
-                boxShadow: '0 0 6px hsla(160 90% 50% / 0.15)', color: 'hsl(160 90% 50%)', fontSize: '7px', ...mono,
-              }} title="Text-to-Speech Output">
-                <Volume2 style={{ width: 8, height: 8, filter: 'drop-shadow(0 0 3px hsla(160, 90%, 50%, 0.4))' }} />
-              </span>
-              <span className="inline-flex items-center gap-0.5 rounded-full" style={{
-                padding: '1px 5px', background: 'hsla(45 100% 55% / 0.08)', border: '1px solid hsla(45 100% 55% / 0.25)',
-                boxShadow: '0 0 6px hsla(45 100% 55% / 0.15)', color: 'hsl(45 100% 55%)', fontSize: '7px', ...mono,
-              }} title="100% Private — Runs in Browser">
-                <Sparkles style={{ width: 8, height: 8, filter: 'drop-shadow(0 0 3px hsla(45, 100%, 55%, 0.4))' }} />
-              </span>
-            </div>
           </div>
         </div>
         <div className="flex items-center gap-1">
           {ttsLoading && (
             <div className="flex items-center gap-1.5 mr-2">
               <Loader2 className="w-3 h-3 animate-spin text-primary" />
-              <span className="text-[8px] tracking-wider text-muted-foreground" style={mono}>TTS</span>
+              <span className="text-[10px] tracking-wider text-muted-foreground" style={mono}>TTS</span>
             </div>
           )}
           {isLoaded && (
             <button onClick={() => setShowSettings(true)} className="p-1.5 rounded-md transition-all hover:bg-muted" title="Settings">
-              <Settings2 className="w-3.5 h-3.5 text-muted-foreground" />
+              <Settings2 className="w-4 h-4 text-muted-foreground" />
             </button>
           )}
           <button onClick={onToggleTTS} className="p-1.5 rounded-md transition-all" style={{
             background: ttsEnabled ? 'hsla(190, 100%, 55%, 0.08)' : 'transparent',
             color: ttsEnabled ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
           }} title={ttsEnabled ? 'Mute TTS' : 'Enable TTS'}>
-            {ttsEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+            {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </button>
           {messages.length > 0 && (
             <button onClick={onClear} className="p-1.5 rounded-md transition-colors hover:bg-muted" title="New Chat">
-              <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
+              <Trash2 className="w-4 h-4 text-muted-foreground" />
             </button>
           )}
         </div>
@@ -295,38 +289,51 @@ function ChatBox({
         style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.15) transparent' }}
       >
         {/* Model Picker */}
-        {!isLoaded && !isLoading && (
+        {showModelSelection && (
           <div className="flex items-center justify-center h-full">
             <div className="flex flex-col gap-4 max-w-md w-full">
               <div className="text-center">
-                <div className="w-14 h-14 mx-auto mb-4 rounded-xl flex items-center justify-center" style={{
+                {wantsModelSwitch && (
+                  <button
+                    onClick={() => setWantsModelSwitch(false)}
+                    className="text-xs text-muted-foreground hover:text-foreground mb-3 transition-colors"
+                    style={mono}
+                  >
+                    ← Back to chat
+                  </button>
+                )}
+                <div className="w-14 h-14 mx-auto mb-3 rounded-xl flex items-center justify-center" style={{
                   background: 'linear-gradient(135deg, hsla(190, 100%, 55%, 0.06), hsla(220, 60%, 30%, 0.06))',
                   border: '1px solid hsla(190, 80%, 40%, 0.12)',
                 }}>
                   <Cpu className="w-7 h-7 text-primary" style={{ filter: 'drop-shadow(0 0 6px hsla(190, 100%, 55%, 0.4))' }} />
                 </div>
-                <p className="text-sm font-medium tracking-wide text-primary">Select AI Model</p>
-                <p className="text-[10px] mt-1.5 tracking-wider text-muted-foreground" style={mono}>
+                <p className="text-base font-medium tracking-wide text-primary">
+                  {wantsModelSwitch ? 'Switch AI Model' : 'Select AI Model'}
+                </p>
+                <p className="text-xs mt-1 tracking-wider text-muted-foreground" style={mono}>
                   IN-BROWSER • WEBGPU • 100% PRIVATE
                 </p>
                 {/* Feature highlights */}
-                <div className="flex items-center justify-center gap-3 mt-3">
-                  {[
-                    { icon: MessageCircle, label: 'Text Chat', hsl: '190 100% 55%' },
-                    { icon: Mic, label: 'Voice Input (STT)', hsl: '190 100% 55%' },
-                    { icon: Volume2, label: 'Voice Output (TTS)', hsl: '160 90% 50%' },
-                    { icon: Sparkles, label: 'Private & Offline', hsl: '45 100% 55%' },
-                  ].map(({ icon: Icon, label, hsl }) => (
-                    <span key={label} className="inline-flex items-center gap-1 rounded-full" style={{
-                      padding: '2px 8px', background: `hsla(${hsl} / 0.08)`, border: `1px solid hsla(${hsl} / 0.25)`,
-                      boxShadow: `0 0 10px hsla(${hsl} / 0.15), inset 0 0 8px hsla(${hsl} / 0.05)`,
-                      color: `hsl(${hsl})`, fontSize: '9px', letterSpacing: '0.05em', ...mono,
-                    }}>
-                      <Icon style={{ width: 11, height: 11, filter: `drop-shadow(0 0 3px hsla(${hsl} / 0.4))` }} />
-                      <span>{label}</span>
-                    </span>
-                  ))}
-                </div>
+                {!wantsModelSwitch && (
+                  <div className="flex items-center justify-center gap-3 mt-3">
+                    {[
+                      { icon: MessageCircle, label: 'Text Chat', hsl: '190 100% 55%' },
+                      { icon: Mic, label: 'Voice Input', hsl: '190 100% 55%' },
+                      { icon: Volume2, label: 'Voice Output', hsl: '160 90% 50%' },
+                      { icon: Sparkles, label: 'Private', hsl: '45 100% 55%' },
+                    ].map(({ icon: Icon, label, hsl }) => (
+                      <span key={label} className="inline-flex items-center gap-1 rounded-full" style={{
+                        padding: '2px 8px', background: `hsla(${hsl} / 0.08)`, border: `1px solid hsla(${hsl} / 0.25)`,
+                        boxShadow: `0 0 10px hsla(${hsl} / 0.15), inset 0 0 8px hsla(${hsl} / 0.05)`,
+                        color: `hsl(${hsl})`, fontSize: '10px', letterSpacing: '0.05em', ...mono,
+                      }}>
+                        <Icon style={{ width: 12, height: 12, filter: `drop-shadow(0 0 3px hsla(${hsl} / 0.4))` }} />
+                        <span>{label}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <button
@@ -337,14 +344,14 @@ function ChatBox({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-primary">{selectedModel.name}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded" style={{
+                    <span className="text-[10px] px-1.5 py-0.5 rounded" style={{
                       background: 'hsla(190, 100%, 55%, 0.06)', color: 'hsl(var(--primary))', ...mono,
                     }}>{selectedModel.params}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded" style={{
+                    <span className="text-[10px] px-1.5 py-0.5 rounded" style={{
                       background: 'hsla(160, 90%, 50%, 0.06)', color: 'hsl(160 90% 50%)', ...mono,
                     }}>{selectedModel.vram} VRAM</span>
                   </div>
-                  <p className="text-[10px] mt-0.5 text-muted-foreground">{selectedModel.description}</p>
+                  <p className="text-xs mt-0.5 text-muted-foreground">{selectedModel.description}</p>
                 </div>
                 <ChevronDown className="w-4 h-4 shrink-0 ml-3 transition-transform text-muted-foreground" style={{ transform: showModelPicker ? 'rotate(180deg)' : 'none' }} />
               </button>
@@ -358,6 +365,7 @@ function ChatBox({
                     .filter(m => showAllModels || m.featured)
                     .map((model) => {
                     const sel = selectedModelId === model.id;
+                    const isCurrentModel = model.id === currentModelId;
                     return (
                       <button
                         key={model.id}
@@ -370,17 +378,22 @@ function ChatBox({
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[11px] font-medium" style={{ color: sel ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}>
+                            <span className="text-xs font-medium" style={{ color: sel ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}>
                               {model.name}
                             </span>
-                            <span className="text-[8px] px-1 py-px rounded" style={{ background: 'hsla(190, 100%, 55%, 0.05)', color: 'hsl(var(--primary))', ...mono }}>
+                            {isCurrentModel && (
+                              <span className="text-[8px] px-1 py-px rounded" style={{ background: 'hsla(160, 90%, 50%, 0.1)', color: 'hsl(160 80% 50%)', ...mono }}>
+                                LOADED
+                              </span>
+                            )}
+                            <span className="text-[9px] px-1 py-px rounded" style={{ background: 'hsla(190, 100%, 55%, 0.05)', color: 'hsl(var(--primary))', ...mono }}>
                               {model.params}
                             </span>
-                            <span className="text-[7px] px-1 py-px rounded" style={{ background: 'hsla(160, 90%, 50%, 0.05)', color: 'hsl(160 70% 45%)', ...mono }}>
+                            <span className="text-[8px] px-1 py-px rounded" style={{ background: 'hsla(160, 90%, 50%, 0.05)', color: 'hsl(160 70% 45%)', ...mono }}>
                               {model.vram}
                             </span>
                           </div>
-                          <p className="text-[9px] mt-0.5 text-muted-foreground">{model.description}</p>
+                          <p className="text-[10px] mt-0.5 text-muted-foreground">{model.description}</p>
                         </div>
                         <div className="text-right shrink-0">
                           <div className="flex gap-px">
@@ -388,14 +401,14 @@ function ChatBox({
                               <div key={j} className="w-[3px] h-3 rounded-sm" style={{ background: j < model.quality ? 'hsl(var(--primary))' : 'hsl(var(--muted))' }} />
                             ))}
                           </div>
-                          <p className="text-[7px] mt-0.5 text-muted-foreground" style={mono}>{model.size}</p>
+                          <p className="text-[8px] mt-0.5 text-muted-foreground" style={mono}>{model.size}</p>
                         </div>
                       </button>
                     );
                   })}
                   <button
                     onClick={() => setShowAllModels(!showAllModels)}
-                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-medium transition-all"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all"
                     style={{
                       color: 'hsl(var(--primary))',
                       background: 'hsla(190, 100%, 55%, 0.03)',
@@ -409,8 +422,8 @@ function ChatBox({
               )}
 
               <button
-                onClick={() => onInit(selectedModelId)}
-                className="flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl text-xs font-medium transition-all hover:scale-[1.01] active:scale-[0.99]"
+                onClick={() => handleInitModel(selectedModelId)}
+                className="flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl text-sm font-medium transition-all hover:scale-[1.01] active:scale-[0.99]"
                 style={{
                   background: 'linear-gradient(135deg, hsla(190, 100%, 55%, 0.1), hsla(190, 100%, 55%, 0.04))',
                   border: '1px solid hsla(190, 100%, 55%, 0.2)',
@@ -419,11 +432,11 @@ function ChatBox({
                 }}
               >
                 <Zap className="w-4 h-4" />
-                Initialize {selectedModel.name}
-                <span className="text-[9px] opacity-50" style={mono}>({selectedModel.size})</span>
+                {wantsModelSwitch ? 'Switch to' : 'Initialize'} {selectedModel.name}
+                <span className="text-[10px] opacity-50" style={mono}>({selectedModel.size})</span>
               </button>
 
-              <p className="text-[8px] text-center tracking-[0.2em] text-muted-foreground" style={mono}>
+              <p className="text-[9px] text-center tracking-[0.15em] text-muted-foreground" style={mono}>
                 CACHED AFTER FIRST DOWNLOAD
               </p>
             </div>
@@ -437,29 +450,29 @@ function ChatBox({
               <Loader2 className="w-12 h-12 animate-spin" style={{ color: 'hsla(190, 100%, 55%, 0.2)' }} />
               <Cpu className="w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
             </div>
-            <p className="text-[10px] max-w-sm text-center leading-relaxed text-muted-foreground" style={mono}>
+            <p className="text-xs max-w-sm text-center leading-relaxed text-muted-foreground" style={mono}>
               {loadProgress}
             </p>
           </div>
         )}
 
         {/* Ready */}
-        {isLoaded && messages.length === 0 && !isLoading && (
+        {isLoaded && messages.length === 0 && !isLoading && !wantsModelSwitch && (
           <div className="flex flex-col items-center justify-center h-full gap-4">
             <Sparkles className="w-8 h-8 text-primary" style={{ filter: 'drop-shadow(0 0 10px hsla(190, 100%, 55%, 0.4))' }} />
-            <p className="text-sm font-medium text-primary">Neural is ready</p>
-            <p className="text-[10px] tracking-wider text-muted-foreground" style={mono}>
+            <p className="text-base font-medium text-primary">Neural is ready</p>
+            <p className="text-xs tracking-wider text-muted-foreground" style={mono}>
               TYPE OR SPEAK A MESSAGE TO BEGIN
             </p>
             <div className="flex items-center gap-4 mt-2">
-              <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground" style={mono}>
-                <Mic className="w-3 h-3" style={{ color: 'hsl(190 100% 55%)' }} /> Voice Input
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground" style={mono}>
+                <Mic className="w-3.5 h-3.5" style={{ color: 'hsl(190 100% 55%)' }} /> Voice Input
               </div>
-              <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground" style={mono}>
-                <Volume2 className="w-3 h-3" style={{ color: 'hsl(160 90% 50%)' }} /> Voice Output
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground" style={mono}>
+                <Volume2 className="w-3.5 h-3.5" style={{ color: 'hsl(160 90% 50%)' }} /> Voice Output
               </div>
-              <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground" style={mono}>
-                <Settings2 className="w-3 h-3 text-muted-foreground" /> Settings
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground" style={mono}>
+                <Settings2 className="w-3.5 h-3.5 text-muted-foreground" /> Settings
               </div>
             </div>
           </div>
@@ -469,7 +482,7 @@ function ChatBox({
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
-              className="max-w-[70%] px-4 py-2.5 text-[12px] leading-relaxed"
+              className="max-w-[75%] px-4 py-3 text-sm leading-relaxed"
               style={
                 msg.role === 'user'
                   ? {
@@ -487,7 +500,7 @@ function ChatBox({
               }
             >
               {msg.role === 'assistant' ? (
-                <div className="prose prose-sm prose-invert max-w-none [&>*]:m-0 [&>*]:text-[12px] [&>p]:leading-relaxed [&_code]:text-[10px] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_strong]:text-primary [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-2 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_h1]:text-sm [&_h2]:text-[13px] [&_h3]:text-[12px] [&_blockquote]:border-l-2 [&_blockquote]:border-primary/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-muted-foreground">
+                <div className="prose prose-sm prose-invert max-w-none [&>*]:m-0 [&>*]:text-sm [&>p]:leading-relaxed [&_code]:text-xs [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_strong]:text-primary [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-2 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_blockquote]:border-l-2 [&_blockquote]:border-primary/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-muted-foreground">
                   <ReactMarkdown>{msg.content || '...'}</ReactMarkdown>
                 </div>
               ) : (
@@ -502,13 +515,13 @@ function ChatBox({
           <div className="flex items-center gap-2 pl-1">
             <div className="flex items-center gap-1">
               {[0, 1, 2].map((i) => (
-                <span key={i} className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{
+                <span key={i} className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{
                   animationDelay: `${i * 150}ms`,
                   animationDuration: '600ms',
                 }} />
               ))}
             </div>
-            <span className="text-[8px] tracking-wider text-muted-foreground" style={mono}>
+            <span className="text-[10px] tracking-wider text-muted-foreground" style={mono}>
               THINKING
             </span>
           </div>
@@ -521,13 +534,13 @@ function ChatBox({
               {[0, 1, 2, 3, 4].map((i) => (
                 <div key={i} className="w-[3px] rounded-full animate-pulse" style={{
                   background: 'hsl(160 90% 50%)',
-                  height: `${4 + i * 2}px`,
+                  height: `${5 + i * 2}px`,
                   animationDelay: `${i * 0.08}s`,
                   filter: 'drop-shadow(0 0 3px hsla(160, 90%, 50%, 0.4))',
                 }} />
               ))}
             </div>
-            <span className="text-[8px] tracking-wider" style={{ color: 'hsl(160 70% 50%)', ...mono }}>SPEAKING</span>
+            <span className="text-[10px] tracking-wider" style={{ color: 'hsl(160 70% 50%)', ...mono }}>SPEAKING</span>
           </div>
         )}
       </div>
@@ -538,14 +551,14 @@ function ChatBox({
       {/* Conversation info bar */}
       {messages.length > 0 && (
         <div className="flex items-center justify-between px-5 py-1 shrink-0" style={{ borderTop: '1px solid hsl(var(--border))', background: 'hsla(215, 30%, 6%, 0.4)' }}>
-          <span className="text-[7px] text-muted-foreground" style={mono}>{messages.length} messages • {totalWords} words</span>
-          <span className="text-[7px] text-muted-foreground" style={mono}>temp: {settings.temperature} • max: {settings.maxTokens}</span>
+          <span className="text-[9px] text-muted-foreground" style={mono}>{messages.length} messages • {totalWords} words</span>
+          <span className="text-[9px] text-muted-foreground" style={mono}>temp: {settings.temperature} • max: {settings.maxTokens}</span>
         </div>
       )}
 
       {/* Input bar */}
       <form onSubmit={handleSubmit} className="px-4 py-3 shrink-0" style={{ borderTop: '1px solid hsl(var(--border))' }}>
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border">
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-card border border-border">
           <input
             ref={inputRef}
             type="text"
@@ -553,7 +566,7 @@ function ChatBox({
             onChange={(e) => setInput(e.target.value)}
             placeholder={isLoaded ? 'Type or use mic to speak...' : 'Load a model first...'}
             disabled={!isLoaded}
-            className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground/30 disabled:opacity-15"
+            className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/30 disabled:opacity-15"
             style={mono}
           />
 
