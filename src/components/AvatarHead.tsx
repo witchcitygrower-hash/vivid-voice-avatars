@@ -20,12 +20,12 @@ function AvatarHead({ audioData, isListening }: Props) {
 
   // -- Materials --
   const whiteMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(0.88, 0.9, 0.92),
-    roughness: 0.25,
-    metalness: 0.15,
-    clearcoat: 0.6,
-    clearcoatRoughness: 0.15,
-    envMapIntensity: 2,
+    color: new THREE.Color(0.55, 0.58, 0.62),
+    roughness: 0.35,
+    metalness: 0.4,
+    clearcoat: 0.8,
+    clearcoatRoughness: 0.1,
+    envMapIntensity: 1.2,
   }), []);
 
   const lightGrayMat = useMemo(() => new THREE.MeshPhysicalMaterial({
