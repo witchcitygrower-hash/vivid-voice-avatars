@@ -279,17 +279,17 @@ const Index = () => {
         {/* Chat history */}
         <div className="flex-1 overflow-y-auto px-3 pb-3" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.15) transparent' }}>
           <div className="flex items-center gap-2 py-2">
-            <span className="text-[8px] tracking-[0.2em] uppercase text-muted-foreground" style={mono}>
+            <span className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground" style={mono}>
               History
             </span>
             <div className="flex-1 h-px bg-border" />
             {history.sessions.length > 0 && (
-              <span className="text-[7px] text-muted-foreground" style={mono}>{history.sessions.length}</span>
+              <span className="text-[9px] text-muted-foreground" style={mono}>{history.sessions.length}</span>
             )}
           </div>
 
           {history.sessions.length === 0 && (
-            <p className="text-[9px] text-muted-foreground text-center py-4" style={mono}>
+            <p className="text-[11px] text-muted-foreground text-center py-4" style={mono}>
               No conversations yet
             </p>
           )}
