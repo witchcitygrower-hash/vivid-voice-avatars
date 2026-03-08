@@ -207,32 +207,6 @@ function SVGAvatar({ audioData, isListening }: Props) {
             })}
           </g>
 
-          {/* === SHOULDER MOUNTS === */}
-          {[-1, 1].map((side) => (
-            <g key={`shoulder-${side}`} transform={`translate(${side * 95}, 120)`}>
-              {/* Main shoulder plate */}
-              <path
-                d={side > 0
-                  ? "M-15,-15 L30,-20 Q45,-18 45,0 L45,30 Q45,40 35,42 L-15,35 Q-25,33 -25,20 L-25,-5 Q-25,-13 -15,-15Z"
-                  : "M15,-15 L-30,-20 Q-45,-18 -45,0 L-45,30 Q-45,40 -35,42 L15,35 Q25,33 25,20 L25,-5 Q25,-13 15,-15Z"
-                }
-                fill="url(#shoulderPlate)"
-                stroke="hsl(210 12% 45%)"
-                strokeWidth="0.8"
-              />
-              {/* Shoulder vent lines */}
-              {[0, 8, 16].map((y, j) => (
-                <line key={j}
-                  x1={side > 0 ? -8 : -20} y1={y} x2={side > 0 ? 20 : 8} y2={y}
-                  stroke="hsl(220 20% 25%)" strokeWidth="2" strokeLinecap="round" />
-              ))}
-              {/* Shoulder light */}
-              <circle cx={side * 5} cy={-8} r="3"
-                fill={`hsl(190 100% 55%)`}
-                opacity={0.3 + s.volume * 0.5}
-                filter="url(#glow)" />
-            </g>
-          ))}
 
           {/* === NECK MECHANISM === */}
           <g>
