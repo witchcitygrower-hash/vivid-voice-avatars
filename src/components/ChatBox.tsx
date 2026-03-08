@@ -22,11 +22,37 @@ interface Props {
   onToggleTTS: () => void;
 }
 
-const capabilityIcons: Record<string, { icon: typeof MessageCircle; label: string; color: string }> = {
-  text: { icon: MessageCircle, label: 'Text', color: 'hsl(var(--primary))' },
-  voice: { icon: Volume2, label: 'Voice (TTS)', color: 'hsl(160 80% 50%)' },
-  vision: { icon: Eye, label: 'Vision', color: 'hsl(var(--secondary))' },
+const capabilityConfig: Record<string, { icon: typeof MessageCircle; label: string; hsl: string; glowColor: string }> = {
+  text: { icon: MessageCircle, label: 'Text Chat', hsl: '190 100% 55%', glowColor: 'hsla(190, 100%, 55%, 0.4)' },
+  voice: { icon: Volume2, label: 'Voice Output', hsl: '160 90% 50%', glowColor: 'hsla(160, 90%, 50%, 0.4)' },
+  vision: { icon: Eye, label: 'Image Understanding', hsl: '280 85% 65%', glowColor: 'hsla(280, 85%, 65%, 0.4)' },
 };
+
+function CapabilityBadge({ cap, size = 'sm' }: { cap: string; size?: 'sm' | 'md' }) {
+  const info = capabilityConfig[cap];
+  if (!info) return null;
+  const Icon = info.icon;
+  const isMd = size === 'md';
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full"
+      style={{
+        padding: isMd ? '2px 8px' : '1px 5px',
+        background: `hsla(${info.hsl} / 0.08)`,
+        border: `1px solid hsla(${info.hsl} / 0.25)`,
+        boxShadow: `0 0 ${isMd ? '10px' : '6px'} hsla(${info.hsl} / 0.15), inset 0 0 ${isMd ? '8px' : '4px'} hsla(${info.hsl} / 0.05)`,
+        color: `hsl(${info.hsl})`,
+        fontFamily: 'var(--font-mono)',
+        fontSize: isMd ? '9px' : '7px',
+        letterSpacing: '0.05em',
+      }}
+      title={info.label}
+    >
+      <Icon style={{ width: isMd ? 11 : 8, height: isMd ? 11 : 8, filter: `drop-shadow(0 0 3px ${info.glowColor})` }} />
+      {isMd && <span>{info.label}</span>}
+    </span>
+  );
+}
 
 function ChatBox({
   isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId,
