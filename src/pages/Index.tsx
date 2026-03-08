@@ -56,8 +56,14 @@ const Index = () => {
     if (!history.activeSessionId) {
       history.createSession(currentModelId);
     }
+    // Immediately trigger action from user message so it plays during generation
+    const userAction = detectAction(text);
+    if (userAction) {
+      console.log('[Action] Detected from user input:', userAction);
+      avatar.triggerAction(userAction);
+    }
     sendMessage(text);
-  }, [history.activeSessionId, currentModelId, sendMessage, history.createSession]);
+  }, [history.activeSessionId, currentModelId, sendMessage, history.createSession, avatar.triggerAction]);
 
   const handleNewChat = useCallback(() => {
     clearMessages();
