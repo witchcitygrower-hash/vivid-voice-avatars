@@ -19,73 +19,77 @@ function AvatarScene({ audioData, isListening }: Props) {
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', toneMapping: 3 }}
     >
-      <color attach="background" args={['#050810']} />
-      <fog attach="fog" args={['#050810', 4, 12]} />
+      <color attach="background" args={['#080c14']} />
+      <fog attach="fog" args={['#080c14', 5, 14]} />
 
-      {/* Three-point cinematic lighting */}
-      <directionalLight position={[3, 5, 3]} intensity={2.2} color="#ffe4cc" castShadow />
-      <directionalLight position={[-4, 2, 1]} intensity={0.8} color="#6ec8f0" />
+      {/* Key light - warm from top right */}
+      <directionalLight position={[3, 5, 4]} intensity={3} color="#fff5e6" castShadow />
       
-      {/* Rim light */}
+      {/* Fill light - cool from left */}
+      <directionalLight position={[-4, 2, 2]} intensity={1.5} color="#b0d4ff" />
+
+      {/* Back rim light - strong cyan */}
       <spotLight
-        position={[0, 4, -4]}
-        intensity={isListening ? 4 + audioData.volume * 8 : 2.5}
+        position={[0, 3, -3]}
+        intensity={isListening ? 5 + audioData.volume * 8 : 3}
         color="#00ccff"
-        angle={0.5}
+        angle={0.6}
         penumbra={1}
         castShadow
       />
 
+      {/* Front fill - subtle */}
+      <directionalLight position={[0, 0, 5]} intensity={0.8} color="#ffffff" />
+
       {/* Bottom accent */}
       <pointLight
-        position={[0, -3, 1.5]}
-        intensity={isListening ? 1.2 + audioData.bass * 4 : 0.5}
-        color="#ff2266"
+        position={[0, -2, 2]}
+        intensity={isListening ? 1.5 + audioData.bass * 4 : 0.8}
+        color="#00aaff"
         distance={8}
       />
 
       {/* Side accents */}
       <pointLight
-        position={[-3, 0, 0]}
-        intensity={isListening ? 0.5 + audioData.mid * 2 : 0.2}
-        color="#4400ff"
+        position={[-3, 0.5, 1]}
+        intensity={isListening ? 0.8 + audioData.mid * 2 : 0.4}
+        color="#4466ff"
         distance={6}
       />
       <pointLight
-        position={[3, 0, 0]}
-        intensity={isListening ? 0.5 + audioData.treble * 2 : 0.2}
-        color="#00ffaa"
+        position={[3, 0.5, 1]}
+        intensity={isListening ? 0.8 + audioData.treble * 2 : 0.4}
+        color="#00ffcc"
         distance={6}
       />
 
-      <ambientLight intensity={0.08} color="#0a0a1a" />
+      <ambientLight intensity={0.25} color="#88aacc" />
 
       <AvatarHead audioData={audioData} isListening={isListening} />
       <WaveformRing audioData={audioData} isListening={isListening} />
       <ParticleField audioData={audioData} isListening={isListening} />
 
       <ContactShadows
-        position={[0, -1.6, 0]}
-        opacity={0.5}
-        scale={10}
+        position={[0, -1.4, 0]}
+        opacity={0.4}
+        scale={8}
         blur={3}
-        far={5}
-        color="#00aaff"
+        far={4}
+        color="#004466"
       />
 
-      <Environment preset="night" environmentIntensity={0.4} />
+      <Environment preset="city" environmentIntensity={0.6} />
 
-      {/* Post-processing */}
       <EffectComposer>
         <Bloom
-          intensity={isListening ? 1.2 + audioData.volume * 1.5 : 0.6}
-          luminanceThreshold={0.3}
+          intensity={isListening ? 1.0 + audioData.volume * 1.2 : 0.5}
+          luminanceThreshold={0.4}
           luminanceSmoothing={0.9}
           mipmapBlur
         />
         <Vignette
           offset={0.3}
-          darkness={0.7}
+          darkness={0.6}
           blendFunction={BlendFunction.NORMAL}
         />
       </EffectComposer>
