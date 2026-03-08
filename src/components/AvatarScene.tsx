@@ -39,7 +39,7 @@ function AvatarScene({ audioData, isListening }: Props) {
       />
 
       {/* Front fill - subtle */}
-      <directionalLight position={[0, 0, 5]} intensity={0.8} color="#ffffff" />
+      <directionalLight position={[0, 0, 5]} intensity={0.4} color="#ffffff" />
 
       {/* Bottom accent */}
       <pointLight
