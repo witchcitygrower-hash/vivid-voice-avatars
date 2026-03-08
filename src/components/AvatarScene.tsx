@@ -82,8 +82,8 @@ function AvatarScene({ audioData, isListening }: Props) {
 
       <EffectComposer>
         <Bloom
-          intensity={isListening ? 1.0 + audioData.volume * 1.2 : 0.5}
-          luminanceThreshold={0.4}
+          intensity={isListening ? 0.6 + audioData.volume * 0.8 : 0.3}
+          luminanceThreshold={0.6}
           luminanceSmoothing={0.9}
           mipmapBlur
         />
