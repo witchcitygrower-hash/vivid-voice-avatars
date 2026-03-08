@@ -21,7 +21,7 @@ export function useWebLLM() {
 
     try {
       const engine = await webllm.CreateMLCEngine(
-        'SmolLM2-135M-Instruct-q0f32-MLC',
+        'Llama-3.2-1B-Instruct-q4f16_1-MLC',
         {
           initProgressCallback: (report) => {
             setLoadProgress(report.text);
