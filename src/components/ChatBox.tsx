@@ -82,7 +82,7 @@ function ChatBox({ isLoaded, isLoading, loadProgress, isGenerating, messages, on
               }}
             >
               <Download className="w-3.5 h-3.5" />
-              Load Model (~700MB)
+              Load Model (~2.4GB)
             </button>
           </div>
         )}
