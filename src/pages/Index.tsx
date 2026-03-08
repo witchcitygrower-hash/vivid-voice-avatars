@@ -5,7 +5,8 @@ import { useAvatarAnimations, detectAction, type AvatarAction } from '@/hooks/us
 import SVGAvatar from '@/components/SVGAvatar';
 import ChatBox from '@/components/ChatBox';
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
-import { Plus, MessageSquare, Trash2, Cpu, Volume2 } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Cpu, Volume2, Menu, X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { AudioData } from '@/hooks/useAudioAnalyzer';
 
 const emptyAudioData: AudioData = {
@@ -27,9 +28,10 @@ const Index = () => {
   const wasGeneratingRef = useRef(false);
   const actionCooldownRef = useRef(0);
   const ttsInitStarted = useRef(false);
-  const [pendingReveal, setPendingReveal] = useState(false); // true = hiding last assistant msg while TTS synthesizes
+  const [pendingReveal, setPendingReveal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
 
-  // Pre-load Kokoro TTS immediately
   useEffect(() => {
     if (!ttsInitStarted.current) {
       ttsInitStarted.current = true;
@@ -37,7 +39,6 @@ const Index = () => {
     }
   }, []);
 
-  // Sync messages to active session
   useEffect(() => {
     if (history.activeSessionId && messages.length > 0) {
       history.updateSession(history.activeSessionId, messages, currentModelId);
@@ -49,9 +50,7 @@ const Index = () => {
   const detectActionRobust = useCallback((text: string): AvatarAction | null => {
     const detected = detectAction(text);
     if (detected) return detected;
-
     const lower = text.toLowerCase();
-    // "do something cool/random/fun" → pick a random cool action
     if (/something (cool|random|fun|crazy|awesome|wild|sick|epic)|random (animation|action|move|trick)|surprise me|show me something/i.test(lower)) {
       return COOL_ACTIONS[Math.floor(Math.random() * COOL_ACTIONS.length)];
     }
@@ -75,8 +74,6 @@ const Index = () => {
     return performanceActions[Math.floor(Math.random() * performanceActions.length)];
   }, []);
 
-  // When generation finishes, keep THINKING visible until audio playback starts,
-  // then reveal text + animation together.
   useEffect(() => {
     if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
@@ -85,22 +82,17 @@ const Index = () => {
         const actionFromUser = userMsg ? detectActionRobust(userMsg.content) : null;
         const actionFromAssistant = detectActionRobust(lastMsg.content);
         const action = actionFromUser || actionFromAssistant || pickAmbientAction();
-
         tts.speak(lastMsg.content, () => {
-          // Audio now actually started: reveal text and trigger action in sync
           setPendingReveal(false);
           triggerActionSafely(action);
         });
       } else {
-        // Safety: if no assistant message, don't keep UI blocked
         setPendingReveal(false);
       }
     }
-
     wasGeneratingRef.current = isGenerating;
   }, [isGenerating, messages, tts.speak, detectActionRobust, pickAmbientAction, triggerActionSafely]);
 
-  // Compute visible messages: hide latest assistant while generating or waiting for TTS playback start
   const visibleMessages = useMemo(() => {
     if (messages.length === 0) return messages;
     const last = messages[messages.length - 1];
@@ -114,7 +106,6 @@ const Index = () => {
     if (!history.activeSessionId) {
       history.createSession(currentModelId);
     }
-    // Lock UI into THINKING immediately to prevent any text flash before TTS starts
     setPendingReveal(true);
     sendMessage(text);
   }, [history.activeSessionId, currentModelId, sendMessage, history.createSession]);
@@ -131,12 +122,204 @@ const Index = () => {
       setPendingReveal(false);
       history.switchSession(id);
       setMessages(session.messages);
+      if (isMobile) setSidebarOpen(false);
     }
-  }, [history.sessions, history.switchSession, setMessages]);
+  }, [history.sessions, history.switchSession, setMessages, isMobile]);
 
   const activeAudioData = tts.isSpeaking ? tts.audioData : emptyAudioData;
   const mono = { fontFamily: 'var(--font-mono)' };
 
+  // --- MOBILE LAYOUT ---
+  if (isMobile) {
+    return (
+      <div className="relative w-screen h-screen overflow-hidden select-none bg-background flex flex-col">
+        {/* Mobile header with avatar strip */}
+        <div className="shrink-0 flex items-center gap-2 px-2 py-1.5" style={{
+          background: 'hsla(215, 35%, 5%, 0.98)',
+          borderBottom: '1px solid hsl(var(--border))',
+        }}>
+          {/* Hamburger */}
+          <button onClick={() => setSidebarOpen(true)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+            <Menu className="w-5 h-5 text-primary" />
+          </button>
+
+          {/* Mini avatar */}
+          <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0" style={{
+            border: '1px solid hsla(190, 80%, 40%, 0.2)',
+          }}>
+            <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} action={avatar.currentAction} actionProgress={avatar.animProgress} />
+          </div>
+
+          {/* Status */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold tracking-wider uppercase text-primary" style={mono}>Neural</span>
+              <div
+                className="w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: tts.isSpeaking ? 'hsl(160 100% 55%)' : isGenerating ? 'hsl(45 100% 55%)' : 'hsl(var(--muted-foreground))',
+                  boxShadow: tts.isSpeaking ? '0 0 6px hsl(160 100% 55%)' : isGenerating ? '0 0 6px hsl(45 100% 55%)' : 'none',
+                }}
+              />
+            </div>
+            {currentModelId && (
+              <span className="text-[9px] text-muted-foreground block truncate" style={mono}>
+                {currentModelId.split('-').slice(0, 2).join(' ')}
+              </span>
+            )}
+          </div>
+
+          {/* System badges */}
+          <div className="flex items-center gap-1">
+            {[
+              { label: 'LLM', ready: isLoaded, loading: isLoading },
+              { label: 'TTS', ready: tts.isLoaded, loading: tts.isLoading },
+            ].map(({ label, ready, loading }) => (
+              <span
+                key={label}
+                className="text-[7px] px-1 py-px rounded tracking-wider"
+                style={{
+                  background: ready ? 'hsla(160, 100%, 50%, 0.1)' : loading ? 'hsla(45, 100%, 55%, 0.1)' : 'hsla(210, 15%, 30%, 0.2)',
+                  border: `1px solid ${ready ? 'hsla(160, 100%, 50%, 0.2)' : loading ? 'hsla(45, 100%, 55%, 0.2)' : 'hsla(210, 15%, 30%, 0.1)'}`,
+                  color: ready ? 'hsl(160 80% 55%)' : loading ? 'hsl(45 80% 55%)' : 'hsl(var(--muted-foreground))',
+                  ...mono,
+                }}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Chat area fills remaining space */}
+        <div className="flex-1 min-h-0">
+          <ChatBox
+            isLoaded={isLoaded}
+            isLoading={isLoading}
+            loadProgress={loadProgress}
+            isGenerating={isGenerating || pendingReveal}
+            messages={visibleMessages}
+            currentModelId={currentModelId}
+            ttsEnabled={tts.ttsEnabled}
+            ttsLoading={tts.isLoading}
+            ttsLoaded={tts.isLoaded}
+            ttsSpeaking={tts.isSpeaking}
+            ttsProgress={tts.loadProgress}
+            lastStats={lastStats}
+            settings={settings}
+            onSend={handleSend}
+            onClear={handleNewChat}
+            onInit={initEngine}
+            onToggleTTS={tts.toggleTTS}
+            onUpdateSettings={updateSettings}
+          />
+        </div>
+
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <>
+            <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setSidebarOpen(false)} />
+            <div className="fixed top-0 left-0 bottom-0 z-50 flex flex-col" style={{
+              width: '280px',
+              background: 'hsla(215, 35%, 5%, 0.98)',
+              borderRight: '1px solid hsl(var(--border))',
+            }}>
+              {/* Close */}
+              <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ borderBottom: '1px solid hsl(var(--border))' }}>
+                <span className="text-xs font-semibold tracking-wider uppercase text-primary" style={mono}>Neural</span>
+                <button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
+
+              {/* System info */}
+              <div className="px-3 py-2 shrink-0">
+                <div className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg" style={{ background: 'hsla(215, 25%, 8%, 0.5)', border: '1px solid hsl(var(--border))' }}>
+                  <div className="flex-1 space-y-1">
+                    {currentModelId ? (
+                      <>
+                        <div className="flex items-center gap-1">
+                          <Cpu className="w-3 h-3 text-primary" />
+                          <span className="text-[10px] text-primary" style={mono}>{currentModelId.split('-').slice(0, 2).join(' ')}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Volume2 className="w-3 h-3" style={{ color: tts.isLoaded ? 'hsl(160 80% 50%)' : 'hsl(var(--muted-foreground))' }} />
+                          <span className="text-[10px] text-muted-foreground" style={mono}>Kokoro TTS {tts.isLoaded ? '✓' : tts.isLoading ? '...' : '✗'}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground" style={mono}>No model loaded</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* New Chat */}
+              <div className="px-3 py-2 shrink-0">
+                <button
+                  onClick={() => { handleNewChat(); setSidebarOpen(false); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    background: 'hsla(190, 100%, 55%, 0.06)',
+                    border: '1px solid hsla(190, 100%, 55%, 0.15)',
+                    color: 'hsl(var(--primary))',
+                    ...mono,
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="text-xs tracking-wider uppercase">New Chat</span>
+                </button>
+              </div>
+
+              {/* Chat history */}
+              <div className="flex-1 overflow-y-auto px-3 pb-3" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.15) transparent' }}>
+                <div className="flex items-center gap-2 py-2">
+                  <span className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground" style={mono}>History</span>
+                  <div className="flex-1 h-px bg-border" />
+                  {history.sessions.length > 0 && (
+                    <span className="text-[9px] text-muted-foreground" style={mono}>{history.sessions.length}</span>
+                  )}
+                </div>
+                {history.sessions.length === 0 && (
+                  <p className="text-[11px] text-muted-foreground text-center py-4" style={mono}>No conversations yet</p>
+                )}
+                <div className="space-y-0.5">
+                  {history.sessions.map((session) => {
+                    const isActive = session.id === history.activeSessionId;
+                    return (
+                      <div
+                        key={session.id}
+                        className="group flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer transition-all"
+                        style={{
+                          background: isActive ? 'hsla(190, 100%, 55%, 0.06)' : 'transparent',
+                          border: isActive ? '1px solid hsla(190, 100%, 55%, 0.1)' : '1px solid transparent',
+                        }}
+                        onClick={() => handleSwitchChat(session.id)}
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs truncate" style={{ color: isActive ? 'hsl(190 60% 65%)' : 'hsl(210 10% 55%)', ...mono }}>{session.title}</p>
+                          <p className="text-[9px] text-muted-foreground" style={mono}>{session.messages.length} msgs</p>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); history.deleteSession(session.id); }}
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded transition-all hover:bg-destructive/10"
+                        >
+                          <Trash2 className="w-2.5 h-2.5 text-muted-foreground" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // --- DESKTOP LAYOUT ---
   return (
     <div className="relative w-screen h-screen overflow-hidden select-none bg-background">
       {/* Subtle grid background */}
@@ -191,9 +374,7 @@ const Index = () => {
 
             {/* System badges */}
             <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
-              <span className="text-[10px] tracking-[0.15em] uppercase font-medium text-primary" style={mono}>
-                Neural
-              </span>
+              <span className="text-[10px] tracking-[0.15em] uppercase font-medium text-primary" style={mono}>Neural</span>
               <div className="flex items-center gap-1">
                 {[
                   { label: 'LLM', ready: isLoaded, loading: isLoading },
@@ -218,7 +399,7 @@ const Index = () => {
           </div>
         </div>
 
-      {/* Audio bars when speaking */}
+        {/* Audio bars when speaking */}
         {tts.isSpeaking && (
           <div className="px-3 pb-2 flex flex-col gap-1 shrink-0" style={mono}>
             {[
@@ -242,7 +423,7 @@ const Index = () => {
           <div className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg" style={{ background: 'hsla(215, 25%, 8%, 0.5)', border: '1px solid hsl(var(--border))' }}>
             <div className="flex-1 space-y-1">
               {currentModelId ? (
-                  <>
+                <>
                   <div className="flex items-center gap-1">
                     <Cpu className="w-3 h-3 text-primary" />
                     <span className="text-[10px] text-primary" style={mono}>{currentModelId.split('-').slice(0, 2).join(' ')}</span>
@@ -279,9 +460,7 @@ const Index = () => {
         {/* Chat history */}
         <div className="flex-1 overflow-y-auto px-3 pb-3" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.15) transparent' }}>
           <div className="flex items-center gap-2 py-2">
-            <span className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground" style={mono}>
-              History
-            </span>
+            <span className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground" style={mono}>History</span>
             <div className="flex-1 h-px bg-border" />
             {history.sessions.length > 0 && (
               <span className="text-[9px] text-muted-foreground" style={mono}>{history.sessions.length}</span>
@@ -289,9 +468,7 @@ const Index = () => {
           </div>
 
           {history.sessions.length === 0 && (
-            <p className="text-[11px] text-muted-foreground text-center py-4" style={mono}>
-              No conversations yet
-            </p>
+            <p className="text-[11px] text-muted-foreground text-center py-4" style={mono}>No conversations yet</p>
           )}
 
           <div className="space-y-0.5">
@@ -309,15 +486,8 @@ const Index = () => {
                 >
                   <MessageSquare className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs truncate" style={{
-                      color: isActive ? 'hsl(190 60% 65%)' : 'hsl(210 10% 55%)',
-                      ...mono,
-                    }}>
-                      {session.title}
-                    </p>
-                    <p className="text-[9px] text-muted-foreground" style={mono}>
-                      {session.messages.length} msgs
-                    </p>
+                    <p className="text-xs truncate" style={{ color: isActive ? 'hsl(190 60% 65%)' : 'hsl(210 10% 55%)', ...mono }}>{session.title}</p>
+                    <p className="text-[9px] text-muted-foreground" style={mono}>{session.messages.length} msgs</p>
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); history.deleteSession(session.id); }}
