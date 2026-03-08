@@ -200,9 +200,11 @@ export function useAvatarAnimations() {
   }, []);
 
   useEffect(() => {
-    const tick = () => {
+    let lastUpdate = 0;
+    const tick = (now: number) => {
       const a = animRef.current;
-      if (a) {
+      if (a && now - lastUpdate >= 33) {
+        lastUpdate = now;
         const elapsed = Date.now() / 1000 - a.start;
         const p = Math.min(1, elapsed / a.duration);
         setAnimProgress(p);
