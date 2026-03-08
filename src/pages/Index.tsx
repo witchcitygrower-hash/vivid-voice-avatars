@@ -27,6 +27,7 @@ const Index = () => {
   const wasGeneratingRef = useRef(false);
   const actionCooldownRef = useRef(0);
   const ttsInitStarted = useRef(false);
+  const [pendingReveal, setPendingReveal] = useState(false); // true = hiding last assistant msg while TTS synthesizes
 
   // Pre-load Kokoro TTS immediately
   useEffect(() => {
