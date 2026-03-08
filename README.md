@@ -2,12 +2,12 @@
 
 An AI-powered robot avatar that runs **100% in your browser** — no servers, no API keys, no accounts needed.
 
-Uses **Phi-3.5-mini (3.8B parameters)** via WebLLM + WebGPU for intelligent, private conversations.
+Choose from **7 AI models** (0.5B–3.8B parameters) via WebLLM + WebGPU, with **Kokoro TTS** for voice output and mouth sync.
 
 ## Requirements
 
 - **Browser**: Chrome 113+, Edge 113+, or Safari 17+ (WebGPU required)
-- **GPU**: ~3.7GB VRAM (most modern GPUs work)
+- **GPU**: 1–4GB VRAM depending on model choice
 - **Node.js**: 18+ (for building)
 
 ## Quick Start
@@ -22,13 +22,27 @@ npm run dev
 
 Open `http://localhost:5173` in your browser.
 
-Click **"Load Model"** in the chat box — the model (~2.4GB) downloads once and is cached by your browser.
+Select an AI model and click **"Load"** — models download once and are cached by your browser.
+
+## Available Models
+
+| Model | Parameters | Download | VRAM | Quality |
+|-------|-----------|----------|------|---------|
+| Phi 3.5 Mini | 3.8B | ~2.4GB | ~3.7GB | ★★★★★ |
+| Llama 3.2 3B | 3B | ~1.8GB | ~3GB | ★★★★ |
+| Qwen 2.5 3B | 3B | ~1.8GB | ~3GB | ★★★★ |
+| SmolLM2 1.7B | 1.7B | ~1GB | ~2GB | ★★★ |
+| Qwen 2.5 1.5B | 1.5B | ~1GB | ~2GB | ★★★ |
+| Llama 3.2 1B | 1B | ~700MB | ~1.5GB | ★★ |
+| Qwen 2.5 0.5B | 0.5B | ~350MB | ~1GB | ★ |
 
 ## Features
 
 - 🤖 **SVG Robot Avatar** — audio-reactive face with glowing eyes, LED mouth bars, and particle effects
-- 🧠 **In-Browser AI** — Phi-3.5-mini runs locally via WebGPU, no cloud needed
-- 🎤 **Microphone Input** — real-time audio visualization with frequency analysis
+- 🧠 **7 AI Models** — from ultra-light (0.5B) to powerful (3.8B), all running locally via WebGPU
+- 🔊 **Kokoro TTS** — 82M parameter text-to-speech with real-time mouth sync
+- 🎤 **Voice Input** — speech-to-text via Web Speech API + real-time audio visualization
+- 📸 **Image Upload** — attach images to messages (multimodal support coming)
 - 💬 **Chat Interface** — markdown-rendered streaming responses
 - 🔒 **100% Private** — nothing leaves your browser
 
@@ -44,4 +58,5 @@ npm run preview
 - React + TypeScript + Vite
 - Tailwind CSS + shadcn/ui
 - WebLLM (@mlc-ai/web-llm)
-- Web Audio API
+- Kokoro TTS (kokoro-js)
+- Web Audio API + Web Speech API

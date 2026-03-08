@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import * as webllm from '@mlc-ai/web-llm';
 
 export type ChatMessage = {
@@ -12,23 +12,29 @@ export function useWebLLM() {
   const [loadProgress, setLoadProgress] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [currentModelId, setCurrentModelId] = useState<string | null>(null);
   const engineRef = useRef<webllm.MLCEngine | null>(null);
 
-  const initEngine = useCallback(async () => {
-    if (engineRef.current || isLoading) return;
+  const initEngine = useCallback(async (modelId: string) => {
+    if (isLoading) return;
+
+    // If switching models, reset
+    if (engineRef.current) {
+      engineRef.current = null;
+      setIsLoaded(false);
+    }
+
     setIsLoading(true);
     setLoadProgress('Initializing WebGPU...');
 
     try {
-      const engine = await webllm.CreateMLCEngine(
-        'Phi-3.5-mini-instruct-q4f16_1-MLC',
-        {
-          initProgressCallback: (report) => {
-            setLoadProgress(report.text);
-          },
-        }
-      );
+      const engine = await webllm.CreateMLCEngine(modelId, {
+        initProgressCallback: (report) => {
+          setLoadProgress(report.text);
+        },
+      });
       engineRef.current = engine;
+      setCurrentModelId(modelId);
       setIsLoaded(true);
       setLoadProgress('');
     } catch (e) {
@@ -60,14 +66,12 @@ export function useWebLLM() {
       ];
 
       let assistantContent = '';
-
-      // Add empty assistant message
       setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
       const chunks = await engineRef.current.chat.completions.create({
         messages: chatMessages,
         stream: true,
-        max_tokens: 256,
+        max_tokens: 512,
         temperature: 0.7,
       });
 
@@ -102,6 +106,7 @@ export function useWebLLM() {
     loadProgress,
     isGenerating,
     messages,
+    currentModelId,
     initEngine,
     sendMessage,
     clearMessages,
