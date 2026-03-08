@@ -6,6 +6,27 @@ export type ChatMessage = {
   content: string;
 };
 
+export interface GenerationStats {
+  tokensGenerated: number;
+  tokensPerSecond: number;
+  totalTimeMs: number;
+  promptTokens: number;
+}
+
+export interface ModelSettings {
+  systemPrompt: string;
+  temperature: number;
+  maxTokens: number;
+  topP: number;
+}
+
+const DEFAULT_SETTINGS: ModelSettings = {
+  systemPrompt: 'You are a friendly, helpful robot assistant called Neural. Keep responses concise and engaging. Use casual, warm language.',
+  temperature: 0.7,
+  maxTokens: 512,
+  topP: 0.9,
+};
+
 export function useWebLLM() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +34,8 @@ export function useWebLLM() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentModelId, setCurrentModelId] = useState<string | null>(null);
+  const [lastStats, setLastStats] = useState<GenerationStats | null>(null);
+  const [settings, setSettings] = useState<ModelSettings>(DEFAULT_SETTINGS);
   const engineRef = useRef<webllm.MLCEngine | null>(null);
 
   const initEngine = useCallback(async (modelId: string) => {
@@ -51,13 +74,14 @@ export function useWebLLM() {
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setIsGenerating(true);
+    setLastStats(null);
+
+    const startTime = performance.now();
+    let tokenCount = 0;
 
     try {
       const chatMessages: webllm.ChatCompletionMessageParam[] = [
-        {
-          role: 'system',
-          content: 'You are a friendly, helpful robot assistant called Neural. Keep responses concise and engaging. Use casual, warm language.',
-        },
+        { role: 'system', content: settings.systemPrompt },
         ...newMessages.map((m) => ({
           role: m.role as 'user' | 'assistant' | 'system',
           content: m.content,
@@ -70,12 +94,14 @@ export function useWebLLM() {
       const chunks = await engineRef.current.chat.completions.create({
         messages: chatMessages,
         stream: true,
-        max_tokens: 512,
-        temperature: 0.7,
+        max_tokens: settings.maxTokens,
+        temperature: settings.temperature,
+        top_p: settings.topP,
       });
 
       for await (const chunk of chunks) {
         const delta = chunk.choices[0]?.delta?.content || '';
+        if (delta) tokenCount++;
         assistantContent += delta;
         setMessages((prev) => {
           const updated = [...prev];
@@ -83,6 +109,14 @@ export function useWebLLM() {
           return updated;
         });
       }
+
+      const totalTime = performance.now() - startTime;
+      setLastStats({
+        tokensGenerated: tokenCount,
+        tokensPerSecond: tokenCount / (totalTime / 1000),
+        totalTimeMs: totalTime,
+        promptTokens: newMessages.reduce((sum, m) => sum + m.content.split(/\s+/).length, 0),
+      });
     } catch (e) {
       console.error('Generation error:', e);
       setMessages((prev) => {
@@ -93,10 +127,15 @@ export function useWebLLM() {
     } finally {
       setIsGenerating(false);
     }
-  }, [messages, isGenerating]);
+  }, [messages, isGenerating, settings]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
+    setLastStats(null);
+  }, []);
+
+  const updateSettings = useCallback((partial: Partial<ModelSettings>) => {
+    setSettings(prev => ({ ...prev, ...partial }));
   }, []);
 
   return {
@@ -106,9 +145,12 @@ export function useWebLLM() {
     isGenerating,
     messages,
     currentModelId,
+    lastStats,
+    settings,
     initEngine,
     sendMessage,
     clearMessages,
     setMessages,
+    updateSettings,
   };
 }

@@ -4,7 +4,7 @@ import { useChatHistory } from '@/hooks/useChatHistory';
 import SVGAvatar from '@/components/SVGAvatar';
 import ChatBox from '@/components/ChatBox';
 import { useEffect, useRef, useCallback } from 'react';
-import { Plus, MessageSquare, Trash2 } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Cpu, Volume2 } from 'lucide-react';
 import type { AudioData } from '@/hooks/useAudioAnalyzer';
 
 const emptyAudioData: AudioData = {
@@ -12,7 +12,7 @@ const emptyAudioData: AudioData = {
 };
 
 const Index = () => {
-  const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, initEngine, sendMessage, clearMessages, setMessages } = useWebLLM();
+  const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, lastStats, settings, initEngine, sendMessage, clearMessages, setMessages, updateSettings } = useWebLLM();
   const tts = useKokoroTTS();
   const history = useChatHistory();
   const wasGeneratingRef = useRef(false);
@@ -45,7 +45,6 @@ const Index = () => {
   }, [isGenerating, messages, tts.speak]);
 
   const handleSend = useCallback((text: string) => {
-    // Auto-create session on first message
     if (!history.activeSessionId) {
       history.createSession(currentModelId);
     }
@@ -66,6 +65,7 @@ const Index = () => {
   }, [history.sessions, history.switchSession, setMessages]);
 
   const activeAudioData = tts.isSpeaking ? tts.audioData : emptyAudioData;
+  const mono = { fontFamily: 'var(--font-mono)' };
 
   return (
     <div className="relative w-screen h-screen overflow-hidden select-none bg-background">
@@ -104,7 +104,7 @@ const Index = () => {
             <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} />
 
             {/* Status dot */}
-            <div className="absolute bottom-2 left-2 flex items-center gap-1.5" style={{ fontFamily: 'var(--font-mono)' }}>
+            <div className="absolute bottom-2 left-2 flex items-center gap-1.5" style={mono}>
               <div
                 className="w-1.5 h-1.5 rounded-full transition-all duration-300"
                 style={{
@@ -121,22 +121,23 @@ const Index = () => {
 
             {/* System badges */}
             <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
-              <span className="text-[8px] tracking-[0.2em] uppercase font-medium text-primary" style={{ fontFamily: 'var(--font-mono)' }}>
+              <span className="text-[8px] tracking-[0.2em] uppercase font-medium text-primary" style={mono}>
                 Neural
               </span>
               <div className="flex items-center gap-1">
                 {[
                   { label: 'LLM', ready: isLoaded, loading: isLoading },
+                  { label: 'STT', ready: true, loading: false },
                   { label: 'TTS', ready: tts.isLoaded, loading: tts.isLoading },
                 ].map(({ label, ready, loading }) => (
                   <span
                     key={label}
-                    className="text-[6px] px-1 py-px rounded tracking-wider"
+                    className="text-[5px] px-1 py-px rounded tracking-wider"
                     style={{
                       background: ready ? 'hsla(160, 100%, 50%, 0.1)' : loading ? 'hsla(45, 100%, 55%, 0.1)' : 'hsla(210, 15%, 30%, 0.2)',
                       border: `1px solid ${ready ? 'hsla(160, 100%, 50%, 0.2)' : loading ? 'hsla(45, 100%, 55%, 0.2)' : 'hsla(210, 15%, 30%, 0.1)'}`,
                       color: ready ? 'hsl(160 80% 55%)' : loading ? 'hsl(45 80% 55%)' : 'hsl(var(--muted-foreground))',
-                      fontFamily: 'var(--font-mono)',
+                      ...mono,
                     }}
                   >
                     {label}
@@ -149,7 +150,7 @@ const Index = () => {
 
         {/* Audio bars when speaking */}
         {tts.isSpeaking && (
-          <div className="px-3 pb-2 flex flex-col gap-1 shrink-0" style={{ fontFamily: 'var(--font-mono)' }}>
+          <div className="px-3 pb-2 flex flex-col gap-1 shrink-0" style={mono}>
             {[
               { label: 'VOL', value: activeAudioData.volume, color: 'hsl(var(--primary))' },
               { label: 'BASS', value: activeAudioData.bass, color: 'hsl(var(--accent))' },
@@ -166,6 +167,28 @@ const Index = () => {
           </div>
         )}
 
+        {/* System info */}
+        <div className="px-3 pb-2 shrink-0">
+          <div className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg" style={{ background: 'hsla(215, 25%, 8%, 0.5)', border: '1px solid hsl(var(--border))' }}>
+            <div className="flex-1 space-y-1">
+              {currentModelId ? (
+                <>
+                  <div className="flex items-center gap-1">
+                    <Cpu className="w-2.5 h-2.5 text-primary" />
+                    <span className="text-[8px] text-primary" style={mono}>{currentModelId.split('-').slice(0, 2).join(' ')}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Volume2 className="w-2.5 h-2.5" style={{ color: tts.isLoaded ? 'hsl(160 80% 50%)' : 'hsl(var(--muted-foreground))' }} />
+                    <span className="text-[8px] text-muted-foreground" style={mono}>Kokoro TTS {tts.isLoaded ? '✓' : tts.isLoading ? '...' : '✗'}</span>
+                  </div>
+                </>
+              ) : (
+                <span className="text-[8px] text-muted-foreground" style={mono}>No model loaded</span>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* New Chat button */}
         <div className="px-3 py-2 shrink-0">
           <button
@@ -175,7 +198,7 @@ const Index = () => {
               background: 'hsla(190, 100%, 55%, 0.06)',
               border: '1px solid hsla(190, 100%, 55%, 0.15)',
               color: 'hsl(var(--primary))',
-              fontFamily: 'var(--font-mono)',
+              ...mono,
             }}
           >
             <Plus className="w-3.5 h-3.5" />
@@ -186,14 +209,17 @@ const Index = () => {
         {/* Chat history */}
         <div className="flex-1 overflow-y-auto px-3 pb-3" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.15) transparent' }}>
           <div className="flex items-center gap-2 py-2">
-            <span className="text-[8px] tracking-[0.2em] uppercase text-muted-foreground" style={{ fontFamily: 'var(--font-mono)' }}>
+            <span className="text-[8px] tracking-[0.2em] uppercase text-muted-foreground" style={mono}>
               History
             </span>
             <div className="flex-1 h-px bg-border" />
+            {history.sessions.length > 0 && (
+              <span className="text-[7px] text-muted-foreground" style={mono}>{history.sessions.length}</span>
+            )}
           </div>
 
           {history.sessions.length === 0 && (
-            <p className="text-[9px] text-muted-foreground text-center py-4" style={{ fontFamily: 'var(--font-mono)' }}>
+            <p className="text-[9px] text-muted-foreground text-center py-4" style={mono}>
               No conversations yet
             </p>
           )}
@@ -215,11 +241,11 @@ const Index = () => {
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] truncate" style={{
                       color: isActive ? 'hsl(190 60% 65%)' : 'hsl(210 10% 55%)',
-                      fontFamily: 'var(--font-mono)',
+                      ...mono,
                     }}>
                       {session.title}
                     </p>
-                    <p className="text-[7px] text-muted-foreground" style={{ fontFamily: 'var(--font-mono)' }}>
+                    <p className="text-[7px] text-muted-foreground" style={mono}>
                       {session.messages.length} msgs
                     </p>
                   </div>
@@ -250,10 +276,13 @@ const Index = () => {
           ttsLoaded={tts.isLoaded}
           ttsSpeaking={tts.isSpeaking}
           ttsProgress={tts.loadProgress}
+          lastStats={lastStats}
+          settings={settings}
           onSend={handleSend}
           onClear={handleNewChat}
           onInit={initEngine}
           onToggleTTS={tts.toggleTTS}
+          onUpdateSettings={updateSettings}
         />
       </div>
     </div>
