@@ -23,47 +23,47 @@ function AvatarScene({ audioData, isListening }: Props) {
       <fog attach="fog" args={['#080c14', 5, 14]} />
 
       {/* Key light - warm from top right */}
-      <directionalLight position={[3, 5, 4]} intensity={1.8} color="#fff5e6" castShadow />
+      <directionalLight position={[3, 5, 4]} intensity={1.0} color="#fff5e6" castShadow />
       
       {/* Fill light - cool from left */}
-      <directionalLight position={[-4, 2, 2]} intensity={0.8} color="#b0d4ff" />
+      <directionalLight position={[-4, 2, 2]} intensity={0.5} color="#b0d4ff" />
 
-      {/* Back rim light - strong cyan */}
+      {/* Back rim light - cyan */}
       <spotLight
         position={[0, 3, -3]}
-        intensity={isListening ? 5 + audioData.volume * 8 : 3}
+        intensity={isListening ? 3 + audioData.volume * 5 : 2}
         color="#00ccff"
         angle={0.6}
         penumbra={1}
         castShadow
       />
 
-      {/* Front fill - subtle */}
-      <directionalLight position={[0, 0, 5]} intensity={0.4} color="#ffffff" />
+      {/* Front fill - very subtle */}
+      <directionalLight position={[0, 0, 5]} intensity={0.2} color="#ffffff" />
 
       {/* Bottom accent */}
       <pointLight
         position={[0, -2, 2]}
-        intensity={isListening ? 1.5 + audioData.bass * 4 : 0.8}
+        intensity={isListening ? 0.8 + audioData.bass * 2 : 0.4}
         color="#00aaff"
-        distance={8}
+        distance={6}
       />
 
       {/* Side accents */}
       <pointLight
         position={[-3, 0.5, 1]}
-        intensity={isListening ? 0.8 + audioData.mid * 2 : 0.4}
+        intensity={isListening ? 0.4 + audioData.mid * 1 : 0.2}
         color="#4466ff"
-        distance={6}
+        distance={5}
       />
       <pointLight
         position={[3, 0.5, 1]}
-        intensity={isListening ? 0.8 + audioData.treble * 2 : 0.4}
+        intensity={isListening ? 0.4 + audioData.treble * 1 : 0.2}
         color="#00ffcc"
-        distance={6}
+        distance={5}
       />
 
-      <ambientLight intensity={0.12} color="#88aacc" />
+      <ambientLight intensity={0.06} color="#88aacc" />
 
       <AvatarHead audioData={audioData} isListening={isListening} />
       <WaveformRing audioData={audioData} isListening={isListening} />
