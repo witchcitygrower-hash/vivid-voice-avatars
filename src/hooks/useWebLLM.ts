@@ -108,7 +108,7 @@ export function useWebLLM() {
       const chunks = await engineRef.current.chat.completions.create({
         messages: chatMessages,
         stream: true,
-        max_tokens: settings.maxTokens,
+        max_tokens: Math.min(settings.maxTokens, HARD_MAX_RESPONSE_TOKENS),
         temperature: settings.temperature,
         top_p: settings.topP,
       });
