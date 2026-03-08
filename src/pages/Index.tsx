@@ -1,6 +1,7 @@
 import { useWebLLM } from '@/hooks/useWebLLM';
 import { useKokoroTTS } from '@/hooks/useKokoroTTS';
 import { useChatHistory } from '@/hooks/useChatHistory';
+import { useAvatarAnimations, detectAction } from '@/hooks/useAvatarAnimations';
 import SVGAvatar from '@/components/SVGAvatar';
 import ChatBox from '@/components/ChatBox';
 import { useEffect, useRef, useCallback } from 'react';
