@@ -335,8 +335,8 @@ const Index = () => {
           isLoaded={isLoaded}
           isLoading={isLoading}
           loadProgress={loadProgress}
-          isGenerating={isGenerating}
-          messages={messages}
+          isGenerating={isGenerating || pendingReveal}
+          messages={visibleMessages}
           currentModelId={currentModelId}
           ttsEnabled={tts.ttsEnabled}
           ttsLoading={tts.isLoading}
