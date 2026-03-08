@@ -26,8 +26,13 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Show Node and npm versions
+        run: |
+          node -v
+          npm -v
+
+      - name: Install dependencies (lockfile-agnostic)
+        run: npm install --no-audit --no-fund --package-lock=false
 
       - name: Build
         run: npm run build
