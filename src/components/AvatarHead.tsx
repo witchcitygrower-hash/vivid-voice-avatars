@@ -310,8 +310,8 @@ function AvatarHead({ audioData, isListening }: Props) {
       ))}
 
       {/* === Point lights on robot === */}
-      <pointLight position={[0, 0.06, 0.8]} intensity={0.8} color="#00ddff" distance={2} />
-      <pointLight position={[0, -0.22, 0.75]} intensity={0.4} color="#00ddff" distance={1.5} />
+      <pointLight position={[0, 0.06, 0.8]} intensity={0.3} color="#00ddff" distance={1.5} />
+      <pointLight position={[0, -0.22, 0.75]} intensity={0.15} color="#00ddff" distance={1} />
     </group>
   );
 }
