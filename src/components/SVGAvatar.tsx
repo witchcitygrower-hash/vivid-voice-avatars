@@ -92,7 +92,7 @@ function SVGAvatar({ audioData, isListening }: Props) {
 
       {/* Main avatar SVG */}
       <svg
-        viewBox="0 0 500 650"
+        viewBox="0 0 500 750"
         className="relative z-10 w-[min(85vh,85vw)] h-auto"
         style={{ filter: `drop-shadow(0 0 ${15 + s.volume * 30}px hsla(190, 100%, 50%, ${glowIntensity * 0.2}))` }}
       >
