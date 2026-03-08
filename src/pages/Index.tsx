@@ -12,6 +12,13 @@ const emptyAudioData: AudioData = {
   volume: 0, bass: 0, mid: 0, treble: 0, frequencies: null, waveform: null,
 };
 
+const COOL_ACTIONS: AvatarAction[] = [
+  'backflip', 'frontflip', 'spin', 'dance', 'breakdance', 'robot_dance',
+  'moonwalk', 'disco', 'cartwheel', 'hadouken', 'kamehameha', 'super_saiyan',
+  'barrel_roll', 'matrix_dodge', 'explode', 'teleport', 'glitch', 'power_up',
+  'lightning', 'tornado', 'rainbow', 'helicopter', 'corkscrew', 'moonjump',
+];
+
 const Index = () => {
   const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, lastStats, settings, initEngine, sendMessage, clearMessages, setMessages, updateSettings } = useWebLLM();
   const tts = useKokoroTTS();
