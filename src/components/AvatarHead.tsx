@@ -124,73 +124,74 @@ function AvatarHead({ audioData, isListening }: Props) {
 
   return (
     <group ref={groupRef}>
-      {/* ===== CRANIUM - capsule/pill shape ===== */}
-      <mesh material={mainMat} scale={[1, 1.15, 1]}>
-        <sphereGeometry args={[0.62, 64, 64]} />
+      {/* ===== CRANIUM ===== */}
+      <mesh material={mainMat}>
+        <sphereGeometry args={[0.65, 64, 64]} />
       </mesh>
 
-      {/* Top cap - slightly darker */}
-      <mesh position={[0, 0.52, 0]} material={midGrayMat} scale={[0.7, 0.15, 0.7]}>
+      {/* Top cap */}
+      <mesh position={[0, 0.48, 0]} material={midGrayMat} scale={[0.65, 0.12, 0.65]}>
         <sphereGeometry args={[0.5, 32, 16]} />
       </mesh>
 
-      {/* Head seam - horizontal line */}
-      <mesh position={[0, 0.15, 0]} material={accentMat} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.625, 0.003, 8, 64]} />
+      {/* Head seam */}
+      <mesh position={[0, 0.1, 0]} material={accentMat} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.655, 0.003, 8, 64]} />
       </mesh>
 
-      {/* ===== VISOR / EYE BAND ===== */}
-      {/* Dark visor plate - integrated into head */}
-      <mesh position={[0, 0.08, 0.42]} material={darkMat}>
-        <boxGeometry args={[0.82, 0.28, 0.38]} />
-      </mesh>
-      {/* Visor rounded edges */}
-      <mesh position={[0, 0.08, 0.55]} material={darkMat} scale={[0.82, 0.28, 0.15]}>
-        <sphereGeometry args={[0.5, 32, 16]} />
+      {/* ===== VISOR - thin band ===== */}
+      <mesh position={[0, 0.06, 0.48]} material={darkMat} scale={[1, 1, 1]}>
+        <boxGeometry args={[0.7, 0.18, 0.3]} />
       </mesh>
 
-      {/* ===== EYES ===== */}
+      {/* ===== EYES - in front of visor ===== */}
       {[-1, 1].map((side) => (
-        <group key={side} position={[side * 0.18, 0.08, 0.6]}>
+        <group key={side} position={[side * 0.17, 0.06, 0.64]}>
           {/* Eye ring */}
-          <mesh material={accentMat} rotation={[0, 0, 0]}>
-            <torusGeometry args={[0.072, 0.007, 16, 32]} />
+          <mesh material={accentMat}>
+            <torusGeometry args={[0.065, 0.006, 16, 32]} />
           </mesh>
-          {/* Eye glow disc */}
+          {/* Eye glow */}
           <mesh material={eyeGlowMat}>
-            <circleGeometry args={[0.06, 32]} />
+            <circleGeometry args={[0.055, 32]} />
           </mesh>
-          {/* Pupil */}
-          <mesh position={[0, 0, 0.002]}>
-            <circleGeometry args={[0.022, 16]} />
+          {/* Bright center */}
+          <mesh position={[0, 0, 0.003]}>
+            <circleGeometry args={[0.02, 16]} />
             <meshBasicMaterial color="#ffffff" />
           </mesh>
         </group>
       ))}
 
-      {/* ===== NOSE - minimal ridge ===== */}
-      <mesh position={[0, -0.04, 0.6]} material={midGrayMat}>
-        <boxGeometry args={[0.03, 0.08, 0.03]} />
+      {/* Eyebrow accents */}
+      {[-1, 1].map((side) => (
+        <mesh key={`brow-${side}`} position={[side * 0.17, 0.17, 0.6]} material={accentMat}>
+          <boxGeometry args={[0.1, 0.003, 0.003]} />
+        </mesh>
+      ))}
+
+      {/* ===== NOSE ===== */}
+      <mesh position={[0, -0.06, 0.63]} material={midGrayMat}>
+        <boxGeometry args={[0.025, 0.06, 0.02]} />
       </mesh>
 
-      {/* ===== MOUTH AREA ===== */}
-      <group ref={jawRef} position={[0, -0.22, 0]}>
-        {/* Mouth plate */}
-        <mesh position={[0, 0, 0.56]} material={darkMat}>
-          <boxGeometry args={[0.4, 0.1, 0.06]} />
+      {/* ===== MOUTH ===== */}
+      <group ref={jawRef} position={[0, -0.2, 0]}>
+        {/* Mouth backing plate */}
+        <mesh position={[0, 0, 0.58]} material={darkMat}>
+          <boxGeometry args={[0.35, 0.08, 0.04]} />
         </mesh>
-
-        {/* LED mouth bars */}
-        <group position={[0, 0, 0.59]}>
+        {/* LED bars */}
+        <group position={[0, 0, 0.605]}>
           {Array.from({ length: barCount }).map((_, i) => {
-            const x = (i - (barCount - 1) / 2) * 0.025;
+            const x = (i - (barCount - 1) / 2) * 0.022;
             return (
               <mesh
                 key={i}
                 ref={(el) => { barRefs.current[i] = el; }}
                 position={[x, 0, 0]}
                 material={mouthBarMat}
-                scale={[0.008, 0.035, 0.006]}
+                scale={[0.007, 0.03, 0.005]}
               >
                 <boxGeometry args={[1, 1, 1]} />
               </mesh>
@@ -199,14 +200,12 @@ function AvatarHead({ audioData, isListening }: Props) {
         </group>
       </group>
 
-      {/* ===== CHIN - integrated, not floating ===== */}
-      <mesh position={[0, -0.45, 0.05]} material={mainMat} scale={[0.75, 0.4, 0.75]}>
-        <sphereGeometry args={[0.5, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.7]} />
+      {/* ===== CHIN ===== */}
+      <mesh position={[0, -0.42, 0.05]} material={mainMat} scale={[0.7, 0.35, 0.65]}>
+        <sphereGeometry args={[0.5, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.65]} />
       </mesh>
-
-      {/* Chin accent line */}
-      <mesh position={[0, -0.38, 0.35]} material={accentMat}>
-        <boxGeometry args={[0.2, 0.004, 0.004]} />
+      <mesh position={[0, -0.35, 0.32]} material={accentMat}>
+        <boxGeometry args={[0.18, 0.003, 0.003]} />
       </mesh>
 
       {/* ===== EARS - flush with head ===== */}
