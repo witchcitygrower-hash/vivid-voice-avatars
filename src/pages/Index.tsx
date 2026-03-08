@@ -50,6 +50,10 @@ const Index = () => {
     if (detected) return detected;
 
     const lower = text.toLowerCase();
+    // "do something cool/random/fun" → pick a random cool action
+    if (/something (cool|random|fun|crazy|awesome|wild|sick|epic)|random (animation|action|move|trick)|surprise me|show me something/i.test(lower)) {
+      return COOL_ACTIONS[Math.floor(Math.random() * COOL_ACTIONS.length)];
+    }
     if (lower.includes('back flip') || lower.includes('backflip') || lower.includes('flip')) return 'backflip';
     if (lower.includes('explod') || lower.includes('boom')) return 'explode';
     if (lower.includes('spin') || lower.includes('rotate')) return 'spin';
