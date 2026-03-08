@@ -58,7 +58,7 @@ function SVGAvatar({ audioData, isListening }: Props) {
   const ringDots = 32;
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center overflow-hidden" style={{ background: 'radial-gradient(ellipse at center, hsl(215 40% 8%) 0%, hsl(220 50% 4%) 100%)' }}>
+    <div className="absolute inset-0 flex items-center justify-center overflow-hidden" style={{ background: 'radial-gradient(ellipse at center, hsl(215 40% 8%) 0%, hsl(220 50% 3%) 100%)' }}>
       {/* Background grid */}
       <svg className="absolute inset-0 w-full h-full opacity-[0.04]">
         <defs>
