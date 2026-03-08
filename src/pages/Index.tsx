@@ -218,7 +218,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Audio bars when speaking */}
+      {/* Audio bars when speaking */}
         {tts.isSpeaking && (
           <div className="px-3 pb-2 flex flex-col gap-1 shrink-0" style={mono}>
             {[
@@ -228,7 +228,7 @@ const Index = () => {
               { label: 'HIGH', value: activeAudioData.treble, color: 'hsl(160 80% 50%)' },
             ].map(({ label, value, color }) => (
               <div key={label} className="flex items-center gap-1.5">
-                <span className="text-[7px] tracking-wider w-6 text-right text-muted-foreground">{label}</span>
+                <span className="text-[9px] tracking-wider w-7 text-right text-muted-foreground">{label}</span>
                 <div className="flex-1 h-[3px] rounded-full overflow-hidden bg-muted">
                   <div className="h-full rounded-full transition-all duration-75" style={{ width: `${value * 100}%`, background: color, boxShadow: value > 0.3 ? `0 0 6px ${color}` : 'none' }} />
                 </div>
