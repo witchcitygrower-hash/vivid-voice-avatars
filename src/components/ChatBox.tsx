@@ -229,13 +229,6 @@ function ChatBox({
                       {selectedModel.capabilities.map(cap => (
                         <CapabilityBadge key={cap} cap={cap} />
                       ))}
-                    </div>
-                          }} title={info.label}>
-                            <Icon className="w-2.5 h-2.5" />
-                          </span>
-                        );
-                      })}
-                    </div>
                   </div>
                   <p className="text-[10px] mt-0.5 text-muted-foreground">{selectedModel.description}</p>
                 </div>
