@@ -13,8 +13,15 @@ const emptyAudioData: AudioData = {
 const Index = () => {
   const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, initEngine, sendMessage, clearMessages } = useWebLLM();
   const tts = useKokoroTTS();
-  const prevMsgCountRef = useRef(messages.length);
   const wasGeneratingRef = useRef(false);
+
+  // Auto-load TTS when LLM model loads
+  useEffect(() => {
+    if (isLoaded && !tts.isLoaded && !tts.isLoading) {
+      console.log('[Index] LLM loaded, auto-loading TTS...');
+      tts.initTTS();
+    }
+  }, [isLoaded, tts.isLoaded, tts.isLoading, tts.initTTS]);
 
   // Auto-speak when assistant message finishes generating
   useEffect(() => {
