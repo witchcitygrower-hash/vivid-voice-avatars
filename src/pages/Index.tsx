@@ -307,15 +307,15 @@ const Index = () => {
                   }}
                   onClick={() => handleSwitchChat(session.id)}
                 >
-                  <MessageSquare className="w-3 h-3 shrink-0" style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
+                  <MessageSquare className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] truncate" style={{
+                    <p className="text-xs truncate" style={{
                       color: isActive ? 'hsl(190 60% 65%)' : 'hsl(210 10% 55%)',
                       ...mono,
                     }}>
                       {session.title}
                     </p>
-                    <p className="text-[7px] text-muted-foreground" style={mono}>
+                    <p className="text-[9px] text-muted-foreground" style={mono}>
                       {session.messages.length} msgs
                     </p>
                   </div>
