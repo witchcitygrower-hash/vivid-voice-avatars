@@ -18,7 +18,7 @@ const Index = () => {
   const history = useChatHistory();
   const avatar = useAvatarAnimations();
   const wasGeneratingRef = useRef(false);
-  const ttsInitStarted = useRef(false);
+  const actionCooldownRef = useRef(0);
 
   // Pre-load Kokoro TTS immediately
   useEffect(() => {
