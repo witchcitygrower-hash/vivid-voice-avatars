@@ -75,7 +75,8 @@ const Index = () => {
     return performanceActions[Math.floor(Math.random() * performanceActions.length)];
   }, []);
 
-  // When generation finishes, hide text, synthesize TTS, then reveal text + animation together
+  // When generation finishes, keep THINKING visible until audio playback starts,
+  // then reveal text + animation together.
   useEffect(() => {
     if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
@@ -85,27 +86,25 @@ const Index = () => {
         const actionFromAssistant = detectActionRobust(lastMsg.content);
         const action = actionFromUser || actionFromAssistant || pickAmbientAction();
 
-        // Hide the assistant message while TTS synthesizes
-        setPendingReveal(true);
-
         tts.speak(lastMsg.content, () => {
-          // Audio is now playing — reveal text and trigger animation simultaneously
+          // Audio now actually started: reveal text and trigger action in sync
           setPendingReveal(false);
           triggerActionSafely(action);
         });
+      } else {
+        // Safety: if no assistant message, don't keep UI blocked
+        setPendingReveal(false);
       }
     }
+
     wasGeneratingRef.current = isGenerating;
   }, [isGenerating, messages, tts.speak, detectActionRobust, pickAmbientAction, triggerActionSafely]);
 
-  // Compute visible messages: hide streaming assistant text AND pending reveal
+  // Compute visible messages: hide latest assistant while generating or waiting for TTS playback start
   const visibleMessages = useMemo(() => {
-    // While generating, hide the streaming assistant placeholder
-    if (isGenerating && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant') {
-      return messages.slice(0, -1);
-    }
-    // While TTS is synthesizing, hide the completed assistant message
-    if (pendingReveal && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant') {
+    if (messages.length === 0) return messages;
+    const last = messages[messages.length - 1];
+    if (last?.role === 'assistant' && (isGenerating || pendingReveal)) {
       return messages.slice(0, -1);
     }
     return messages;
@@ -115,17 +114,21 @@ const Index = () => {
     if (!history.activeSessionId) {
       history.createSession(currentModelId);
     }
+    // Lock UI into THINKING immediately to prevent any text flash before TTS starts
+    setPendingReveal(true);
     sendMessage(text);
   }, [history.activeSessionId, currentModelId, sendMessage, history.createSession]);
 
   const handleNewChat = useCallback(() => {
     clearMessages();
+    setPendingReveal(false);
     history.setActiveSessionId(null);
   }, [clearMessages, history.setActiveSessionId]);
 
   const handleSwitchChat = useCallback((id: string) => {
     const session = history.sessions.find(s => s.id === id);
     if (session) {
+      setPendingReveal(false);
       history.switchSession(id);
       setMessages(session.messages);
     }

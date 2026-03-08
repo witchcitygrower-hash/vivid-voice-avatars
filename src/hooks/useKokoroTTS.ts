@@ -165,6 +165,9 @@ export function useKokoroTTS() {
 
     sourceRef.current = source;
     source.start();
+
+    // Mark speaking ONLY when playback actually starts
+    setIsSpeaking(true);
     analyzeLoop();
     onStart?.();
     console.log('[TTS] Playback started');
@@ -173,7 +176,13 @@ export function useKokoroTTS() {
   const speak = useCallback(async (text: string, onPlaybackStart?: () => void) => {
     console.log('[TTS] speak() called. loaded:', !!ttsRef.current, 'speaking:', isSpeakingRef.current, 'enabled:', ttsEnabledRef.current);
 
-    if (isSpeakingRef.current || !ttsEnabledRef.current) return;
+    if (isSpeakingRef.current) return;
+
+    // If TTS is disabled, immediately continue UI flow (reveal text/animation) without audio
+    if (!ttsEnabledRef.current) {
+      onPlaybackStart?.();
+      return;
+    }
 
     // If Kokoro not loaded, use browser fallback
     if (!ttsRef.current) {
@@ -182,8 +191,8 @@ export function useKokoroTTS() {
       return;
     }
 
+    // Lock speaking pipeline during synthesis + playback
     isSpeakingRef.current = true;
-    setIsSpeaking(true);
 
     // Yield to event loop
     await new Promise(r => setTimeout(r, 10));
