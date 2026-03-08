@@ -16,9 +16,13 @@ export function useKokoroTTS() {
   const analyzerRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number>(0);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const isSpeakingRef = useRef(false);
+  const ttsEnabledRef = useRef(false);
+  const isLoadingRef = useRef(false);
 
   const initTTS = useCallback(async () => {
-    if (ttsRef.current || isLoading) return;
+    if (ttsRef.current || isLoadingRef.current) return;
+    isLoadingRef.current = true;
     setIsLoading(true);
     setLoadProgress('Loading Kokoro TTS (82M)...');
 
@@ -31,15 +35,17 @@ export function useKokoroTTS() {
       ttsRef.current = tts;
       setIsLoaded(true);
       setLoadProgress('');
+      console.log('Kokoro TTS loaded successfully');
     } catch (e) {
       console.error('Failed to load Kokoro TTS:', e);
       setLoadProgress(`TTS Error: ${e instanceof Error ? e.message : 'Failed to load'}`);
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [isLoading]);
+  }, []);
 
-  const analyzeAudio = useCallback(() => {
+  const analyzeLoop = useCallback(() => {
     if (!analyzerRef.current) return;
     const analyzer = analyzerRef.current;
     const freqData = new Uint8Array(analyzer.frequencyBinCount);
@@ -69,26 +75,38 @@ export function useKokoroTTS() {
       waveform: timeData,
     });
 
-    rafRef.current = requestAnimationFrame(analyzeAudio);
+    rafRef.current = requestAnimationFrame(analyzeLoop);
   }, []);
 
   const speak = useCallback(async (text: string) => {
-    if (!ttsRef.current || isSpeaking || !ttsEnabled) return;
+    if (!ttsRef.current || isSpeakingRef.current) return;
+    if (!ttsEnabledRef.current) return;
+
+    console.log('TTS speaking:', text.substring(0, 50) + '...');
+    isSpeakingRef.current = true;
     setIsSpeaking(true);
 
     try {
       const rawAudio = await ttsRef.current.generate(text, { voice: 'af_heart' });
+      console.log('TTS audio generated, keys:', Object.keys(rawAudio));
 
       // Extract samples - handle different possible property names
       const samples: Float32Array = rawAudio.audio ?? rawAudio.waveform ?? rawAudio.data;
       const sampleRate: number = rawAudio.sampling_rate ?? rawAudio.sampleRate ?? 24000;
 
+      console.log('TTS samples:', samples?.length, 'rate:', sampleRate);
+
       if (!samples || samples.length === 0) {
-        throw new Error('No audio data returned');
+        throw new Error('No audio data returned from TTS');
       }
 
       const ctx = audioContextRef.current ?? new AudioContext();
       audioContextRef.current = ctx;
+
+      // Resume context if suspended (browser autoplay policy)
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
 
       const buffer = ctx.createBuffer(1, samples.length, sampleRate);
       buffer.getChannelData(0).set(samples);
@@ -105,39 +123,46 @@ export function useKokoroTTS() {
       analyzer.connect(ctx.destination);
 
       source.onended = () => {
+        isSpeakingRef.current = false;
         setIsSpeaking(false);
         cancelAnimationFrame(rafRef.current);
         setAudioData({ volume: 0, bass: 0, mid: 0, treble: 0, frequencies: null, waveform: null });
         sourceRef.current = null;
+        console.log('TTS playback ended');
       };
 
       sourceRef.current = source;
       source.start();
-      analyzeAudio();
+      analyzeLoop();
+      console.log('TTS playback started');
     } catch (e) {
       console.error('TTS speak error:', e);
+      isSpeakingRef.current = false;
       setIsSpeaking(false);
     }
-  }, [isSpeaking, ttsEnabled, analyzeAudio]);
+  }, [analyzeLoop]);
 
   const stopSpeaking = useCallback(() => {
     try { sourceRef.current?.stop(); } catch {}
     cancelAnimationFrame(rafRef.current);
+    isSpeakingRef.current = false;
     setIsSpeaking(false);
     setAudioData({ volume: 0, bass: 0, mid: 0, treble: 0, frequencies: null, waveform: null });
   }, []);
 
   const toggleTTS = useCallback(async () => {
-    if (!ttsEnabled) {
+    if (!ttsEnabledRef.current) {
+      ttsEnabledRef.current = true;
       setTtsEnabled(true);
-      if (!ttsRef.current && !isLoading) {
+      if (!ttsRef.current && !isLoadingRef.current) {
         await initTTS();
       }
     } else {
+      ttsEnabledRef.current = false;
       setTtsEnabled(false);
       stopSpeaking();
     }
-  }, [ttsEnabled, isLoading, initTTS, stopSpeaking]);
+  }, [initTTS, stopSpeaking]);
 
   return {
     isLoaded,
