@@ -78,7 +78,7 @@ function AvatarScene({ audioData, isListening }: Props) {
         color="#004466"
       />
 
-      <Environment preset="city" environmentIntensity={0.35} />
+      <Environment preset="city" environmentIntensity={0.25} />
 
       <EffectComposer>
         <Bloom
