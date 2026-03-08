@@ -136,7 +136,7 @@ export function useKokoroTTS() {
     window.speechSynthesis.speak(utterance);
   }, [resetState]);
 
-  const playAudio = useCallback((samples: Float32Array, sampleRate: number) => {
+  const playAudio = useCallback((samples: Float32Array, sampleRate: number, onStart?: () => void) => {
     const ctx = audioContextRef.current ?? new AudioContext();
     audioContextRef.current = ctx;
 
@@ -166,6 +166,7 @@ export function useKokoroTTS() {
     sourceRef.current = source;
     source.start();
     analyzeLoop();
+    onStart?.();
     console.log('[TTS] Playback started');
   }, [analyzeLoop, resetState]);
 
