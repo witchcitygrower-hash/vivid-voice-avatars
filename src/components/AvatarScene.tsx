@@ -15,7 +15,7 @@ interface Props {
 function AvatarScene({ audioData, isListening }: Props) {
   return (
     <Canvas
-      camera={{ position: [0, 0.3, 3.2], fov: 32 }}
+      camera={{ position: [0, 0.2, 3.8], fov: 30 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', toneMapping: 3 }}
     >
