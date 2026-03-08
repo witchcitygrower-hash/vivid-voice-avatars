@@ -6,6 +6,7 @@ export interface ModelOption {
   vram: string;
   description: string;
   quality: 1 | 2 | 3 | 4 | 5;
+  capabilities: ('text' | 'voice' | 'vision')[];
 }
 
 export const AVAILABLE_MODELS: ModelOption[] = [
@@ -17,6 +18,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~3.7GB',
     description: 'Best quality — Microsoft\'s strongest small model',
     quality: 5,
+    capabilities: ['text', 'voice'],
   },
   {
     id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',
@@ -26,6 +28,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~3GB',
     description: 'Great reasoning — Meta\'s latest compact model',
     quality: 4,
+    capabilities: ['text', 'voice'],
   },
   {
     id: 'Qwen2.5-3B-Instruct-q4f16_1-MLC',
@@ -35,6 +38,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~3GB',
     description: 'Strong multilingual — Alibaba\'s versatile model',
     quality: 4,
+    capabilities: ['text', 'voice'],
   },
   {
     id: 'SmolLM2-1.7B-Instruct-q4f16_1-MLC',
@@ -44,6 +48,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~2GB',
     description: 'Efficient — HuggingFace\'s optimized small model',
     quality: 3,
+    capabilities: ['text', 'voice'],
   },
   {
     id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
@@ -53,6 +58,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~2GB',
     description: 'Good balance — fast with decent quality',
     quality: 3,
+    capabilities: ['text', 'voice'],
   },
   {
     id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
@@ -62,6 +68,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~1.5GB',
     description: 'Fast & light — good for quick responses',
     quality: 2,
+    capabilities: ['text', 'voice'],
   },
   {
     id: 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',
@@ -71,6 +78,7 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     vram: '~1GB',
     description: 'Ultra-light — fastest download, basic quality',
     quality: 1,
+    capabilities: ['text', 'voice'],
   },
 ];
 
