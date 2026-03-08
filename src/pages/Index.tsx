@@ -16,6 +16,7 @@ const Index = () => {
   const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, lastStats, settings, initEngine, sendMessage, clearMessages, setMessages, updateSettings } = useWebLLM();
   const tts = useKokoroTTS();
   const history = useChatHistory();
+  const avatar = useAvatarAnimations();
   const wasGeneratingRef = useRef(false);
   const ttsInitStarted = useRef(false);
 
