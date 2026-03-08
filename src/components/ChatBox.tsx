@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Send, Trash2, Bot, Loader2, Download, Volume2, VolumeX, Mic, MicOff, Image, X, ChevronDown, Sparkles, Cpu } from 'lucide-react';
+import { Send, Trash2, Loader2, Download, Volume2, VolumeX, Mic, MicOff, Image, X, ChevronDown, Sparkles, Cpu, Zap, CircuitBoard } from 'lucide-react';
 import type { ChatMessage } from '@/hooks/useWebLLM';
-import { AVAILABLE_MODELS, type ModelOption } from '@/config/models';
+import { AVAILABLE_MODELS } from '@/config/models';
 
 interface Props {
   isLoaded: boolean;
@@ -94,182 +94,236 @@ function ChatBox({
 
   return (
     <div
-      className="flex flex-col rounded-2xl overflow-hidden backdrop-blur-2xl"
+      className="flex flex-col overflow-hidden"
       style={{
-        background: 'hsla(220, 40%, 6%, 0.92)',
-        border: '1px solid hsla(190, 60%, 30%, 0.2)',
-        boxShadow: '0 12px 48px hsla(220, 50%, 2%, 0.7), inset 0 1px 0 hsla(190, 60%, 40%, 0.06)',
-        width: '400px',
-        maxHeight: '500px',
+        background: 'hsla(215, 35%, 5%, 0.95)',
+        border: '1px solid hsla(190, 80%, 35%, 0.15)',
+        borderRadius: '16px',
+        boxShadow: '0 0 60px hsla(190, 100%, 50%, 0.04), 0 20px 60px hsla(220, 50%, 2%, 0.8), inset 0 1px 0 hsla(190, 80%, 50%, 0.08)',
+        width: '380px',
+        maxHeight: '480px',
       }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: '1px solid hsla(190, 60%, 30%, 0.12)' }}>
-        <div className="flex items-center gap-2.5">
-          <div className="relative">
-            <Bot className="w-4.5 h-4.5" style={{ color: 'hsl(190 100% 55%)' }} />
-            {isLoaded && (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: 'hsl(160 100% 50%)', boxShadow: '0 0 6px hsl(160 100% 50%)' }} />
-            )}
-          </div>
+      {/* Header bar */}
+      <div
+        className="flex items-center justify-between px-4 py-2.5 shrink-0"
+        style={{
+          background: 'linear-gradient(180deg, hsla(215, 30%, 10%, 0.8), hsla(215, 30%, 8%, 0.4))',
+          borderBottom: '1px solid hsla(190, 80%, 35%, 0.1)',
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <CircuitBoard className="w-4 h-4" style={{ color: 'hsl(190 90% 55%)' }} />
           <div>
-            <span className="text-xs font-semibold tracking-wider uppercase" style={{ color: 'hsl(210 20% 70%)' }}>
-              Neural Chat
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold tracking-[0.15em] uppercase" style={{ color: 'hsl(190 60% 70%)' }}>
+                Neural
+              </span>
+              {isLoaded && (
+                <span
+                  className="text-[8px] px-1.5 py-px rounded tracking-wider uppercase"
+                  style={{
+                    background: 'hsla(160, 100%, 50%, 0.1)',
+                    border: '1px solid hsla(160, 100%, 50%, 0.2)',
+                    color: 'hsl(160 80% 55%)',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  Online
+                </span>
+              )}
+            </div>
             {activeModel && (
-              <p className="text-[9px] mt-0.5" style={{ color: 'hsl(190 60% 45%)', fontFamily: 'var(--font-mono)' }}>
-                {activeModel.name} ({activeModel.params})
+              <p className="text-[8px] -mt-0.5 tracking-wider" style={{ color: 'hsl(210 15% 40%)', fontFamily: 'var(--font-mono)' }}>
+                {activeModel.name} • {activeModel.params}
               </p>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          {/* TTS Toggle */}
+        <div className="flex items-center gap-0.5">
           <button
             onClick={onToggleTTS}
-            className="p-1.5 rounded-lg transition-all"
+            className="p-1.5 rounded-md transition-all"
             style={{
-              background: ttsEnabled ? 'hsla(190, 100%, 55%, 0.12)' : 'transparent',
-              color: ttsEnabled ? 'hsl(190 100% 55%)' : 'hsl(210 15% 40%)',
+              background: ttsEnabled ? 'hsla(190, 100%, 55%, 0.1)' : 'transparent',
+              color: ttsEnabled ? 'hsl(190 90% 55%)' : 'hsl(210 15% 35%)',
             }}
-            title={ttsEnabled ? 'Disable voice' : 'Enable voice'}
+            title={ttsEnabled ? 'Mute voice' : 'Unmute voice'}
           >
             {ttsEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
           </button>
           {messages.length > 0 && (
-            <button onClick={onClear} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" title="Clear chat">
-              <Trash2 className="w-3.5 h-3.5" style={{ color: 'hsl(210 15% 40%)' }} />
+            <button onClick={onClear} className="p-1.5 rounded-md transition-colors hover:bg-white/5" title="Clear">
+              <Trash2 className="w-3.5 h-3.5" style={{ color: 'hsl(210 15% 35%)' }} />
             </button>
           )}
         </div>
       </div>
 
-      {/* TTS Loading indicator */}
+      {/* TTS Loading bar */}
       {ttsLoading && (
-        <div className="px-4 py-1.5 flex items-center gap-2" style={{ borderBottom: '1px solid hsla(190, 60%, 30%, 0.08)', background: 'hsla(190, 100%, 55%, 0.04)' }}>
-          <Loader2 className="w-3 h-3 animate-spin" style={{ color: 'hsl(190 100% 55%)' }} />
-          <span className="text-[9px]" style={{ color: 'hsl(190 60% 50%)', fontFamily: 'var(--font-mono)' }}>{ttsProgress || 'Loading TTS...'}</span>
+        <div
+          className="px-4 py-1.5 flex items-center gap-2"
+          style={{ background: 'hsla(190, 100%, 55%, 0.03)', borderBottom: '1px solid hsla(190, 80%, 35%, 0.06)' }}
+        >
+          <Loader2 className="w-3 h-3 animate-spin" style={{ color: 'hsl(190 80% 50%)' }} />
+          <span className="text-[8px] tracking-wider" style={{ color: 'hsl(190 50% 45%)', fontFamily: 'var(--font-mono)' }}>
+            {ttsProgress || 'LOADING VOICE ENGINE...'}
+          </span>
         </div>
       )}
 
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[140px] max-h-[320px]" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.3) transparent' }}>
-
-        {/* Model Picker - shown when not loaded */}
+      {/* Messages area */}
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto px-3 py-3 space-y-2.5 min-h-[130px] max-h-[300px]"
+        style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsla(190, 60%, 30%, 0.2) transparent' }}
+      >
+        {/* Model Picker */}
         {!isLoaded && !isLoading && (
-          <div className="flex flex-col gap-3 py-4">
+          <div className="flex flex-col gap-3 py-3">
             <div className="text-center">
-              <Cpu className="w-8 h-8 mx-auto mb-2" style={{ color: 'hsl(190 80% 50%)' }} />
-              <p className="text-xs font-medium mb-1" style={{ color: 'hsl(210 20% 70%)' }}>Select an AI Model</p>
-              <p className="text-[10px]" style={{ color: 'hsl(210 15% 40%)' }}>
-                Runs 100% in your browser via WebGPU
+              <div
+                className="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, hsla(190, 100%, 55%, 0.08), hsla(220, 60%, 30%, 0.08))',
+                  border: '1px solid hsla(190, 80%, 40%, 0.15)',
+                }}
+              >
+                <Cpu className="w-6 h-6" style={{ color: 'hsl(190 80% 55%)' }} />
+              </div>
+              <p className="text-[11px] font-medium tracking-wide" style={{ color: 'hsl(190 40% 65%)' }}>Select AI Model</p>
+              <p className="text-[9px] mt-1" style={{ color: 'hsl(210 15% 35%)', fontFamily: 'var(--font-mono)' }}>
+                IN-BROWSER • WEBGPU • PRIVATE
               </p>
             </div>
 
-            {/* Model selector button */}
+            {/* Model selector */}
             <button
               onClick={() => setShowModelPicker(!showModelPicker)}
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all"
               style={{
-                background: 'hsla(220, 30%, 12%, 0.8)',
-                border: '1px solid hsla(190, 60%, 30%, 0.25)',
+                background: 'hsla(215, 25%, 10%, 0.8)',
+                border: '1px solid hsla(190, 70%, 35%, 0.2)',
               }}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium" style={{ color: 'hsl(190 80% 65%)' }}>{selectedModel.name}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: 'hsla(190, 100%, 55%, 0.1)', color: 'hsl(190 80% 55%)', fontFamily: 'var(--font-mono)' }}>
+                  <span className="text-[11px] font-medium" style={{ color: 'hsl(190 70% 65%)' }}>{selectedModel.name}</span>
+                  <span
+                    className="text-[8px] px-1.5 py-px rounded"
+                    style={{
+                      background: 'hsla(190, 100%, 55%, 0.08)',
+                      color: 'hsl(190 60% 50%)',
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                  >
                     {selectedModel.params}
                   </span>
                 </div>
-                <p className="text-[10px] mt-0.5 truncate" style={{ color: 'hsl(210 15% 45%)' }}>{selectedModel.description}</p>
+                <p className="text-[9px] mt-0.5 truncate" style={{ color: 'hsl(210 15% 40%)' }}>{selectedModel.description}</p>
               </div>
-              <ChevronDown className="w-4 h-4 shrink-0 ml-2 transition-transform" style={{ color: 'hsl(210 15% 45%)', transform: showModelPicker ? 'rotate(180deg)' : 'none' }} />
+              <ChevronDown
+                className="w-3.5 h-3.5 shrink-0 ml-2 transition-transform duration-200"
+                style={{ color: 'hsl(210 15% 40%)', transform: showModelPicker ? 'rotate(180deg)' : 'none' }}
+              />
             </button>
 
-            {/* Model dropdown */}
+            {/* Dropdown */}
             {showModelPicker && (
-              <div className="space-y-1 max-h-[200px] overflow-y-auto rounded-xl p-1.5" style={{ background: 'hsla(220, 30%, 10%, 0.9)', border: '1px solid hsla(190, 60%, 30%, 0.15)' }}>
-                {AVAILABLE_MODELS.map((model) => (
-                  <button
-                    key={model.id}
-                    onClick={() => { setSelectedModelId(model.id); setShowModelPicker(false); }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all"
-                    style={{
-                      background: selectedModelId === model.id ? 'hsla(190, 100%, 55%, 0.08)' : 'transparent',
-                      border: selectedModelId === model.id ? '1px solid hsla(190, 100%, 55%, 0.2)' : '1px solid transparent',
-                    }}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-medium" style={{ color: selectedModelId === model.id ? 'hsl(190 80% 65%)' : 'hsl(210 15% 65%)' }}>
-                          {model.name}
-                        </span>
-                        <span className="text-[8px] px-1 py-0.5 rounded" style={{ background: 'hsla(190, 100%, 55%, 0.08)', color: 'hsl(190 60% 50%)', fontFamily: 'var(--font-mono)' }}>
-                          {model.params}
-                        </span>
+              <div
+                className="space-y-0.5 max-h-[180px] overflow-y-auto rounded-lg p-1"
+                style={{
+                  background: 'hsla(215, 30%, 8%, 0.95)',
+                  border: '1px solid hsla(190, 70%, 35%, 0.12)',
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: 'hsla(190, 60%, 30%, 0.2) transparent',
+                }}
+              >
+                {AVAILABLE_MODELS.map((model) => {
+                  const isSelected = selectedModelId === model.id;
+                  return (
+                    <button
+                      key={model.id}
+                      onClick={() => { setSelectedModelId(model.id); setShowModelPicker(false); }}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-left transition-all"
+                      style={{
+                        background: isSelected ? 'hsla(190, 100%, 55%, 0.06)' : 'transparent',
+                        border: isSelected ? '1px solid hsla(190, 100%, 55%, 0.15)' : '1px solid transparent',
+                      }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-medium" style={{ color: isSelected ? 'hsl(190 70% 65%)' : 'hsl(210 15% 60%)' }}>
+                            {model.name}
+                          </span>
+                          <span className="text-[7px] px-1 rounded" style={{ background: 'hsla(190, 100%, 55%, 0.06)', color: 'hsl(190 50% 45%)', fontFamily: 'var(--font-mono)' }}>
+                            {model.params}
+                          </span>
+                        </div>
+                        <p className="text-[8px] mt-0.5" style={{ color: 'hsl(210 15% 35%)' }}>{model.description}</p>
                       </div>
-                      <p className="text-[9px] mt-0.5" style={{ color: 'hsl(210 15% 40%)' }}>{model.description}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <div className="flex gap-0.5">
-                        {Array.from({ length: 5 }).map((_, j) => (
-                          <div key={j} className="w-1 h-3 rounded-full" style={{ background: j < model.quality ? 'hsl(190 100% 55%)' : 'hsla(210, 15%, 30%, 0.4)' }} />
-                        ))}
+                      <div className="text-right shrink-0">
+                        <div className="flex gap-px">
+                          {Array.from({ length: 5 }).map((_, j) => (
+                            <div
+                              key={j}
+                              className="w-[3px] h-2.5 rounded-sm"
+                              style={{ background: j < model.quality ? 'hsl(190 100% 55%)' : 'hsla(210, 15%, 25%, 0.5)' }}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-[7px] mt-0.5" style={{ color: 'hsl(210 15% 30%)', fontFamily: 'var(--font-mono)' }}>{model.size}</p>
                       </div>
-                      <p className="text-[8px] mt-0.5" style={{ color: 'hsl(210 15% 35%)', fontFamily: 'var(--font-mono)' }}>{model.size}</p>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             )}
 
             {/* Load button */}
             <button
               onClick={() => onInit(selectedModelId)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-medium transition-all hover:scale-[1.01] active:scale-[0.99]"
               style={{
-                background: 'linear-gradient(135deg, hsla(190, 100%, 55%, 0.15), hsla(190, 100%, 55%, 0.08))',
-                border: '1px solid hsla(190, 100%, 55%, 0.3)',
-                color: 'hsl(190 100% 60%)',
-                boxShadow: '0 4px 16px hsla(190, 100%, 55%, 0.1)',
+                background: 'linear-gradient(135deg, hsla(190, 100%, 55%, 0.12), hsla(190, 100%, 55%, 0.05))',
+                border: '1px solid hsla(190, 100%, 55%, 0.25)',
+                color: 'hsl(190 90% 60%)',
+                boxShadow: '0 2px 12px hsla(190, 100%, 55%, 0.08)',
               }}
             >
-              <Download className="w-4 h-4" />
-              Load {selectedModel.name} ({selectedModel.size})
+              <Zap className="w-3.5 h-3.5" />
+              Initialize {selectedModel.name}
+              <span className="text-[8px] opacity-60" style={{ fontFamily: 'var(--font-mono)' }}>({selectedModel.size})</span>
             </button>
 
-            <p className="text-[9px] text-center" style={{ color: 'hsl(210 15% 30%)' }}>
-              Requires WebGPU • Model cached after first download
+            <p className="text-[8px] text-center tracking-wider" style={{ color: 'hsl(210 15% 28%)', fontFamily: 'var(--font-mono)' }}>
+              CACHED AFTER FIRST DOWNLOAD
             </p>
           </div>
         )}
 
-        {/* Loading state */}
+        {/* Loading */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center h-full gap-3 py-8">
-            <div className="relative">
-              <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'hsl(190 100% 55%)' }} />
-              <div className="absolute inset-0 animate-ping" style={{ border: '1px solid hsla(190, 100%, 55%, 0.2)', borderRadius: '50%' }} />
+            <div className="relative w-10 h-10">
+              <Loader2 className="w-10 h-10 animate-spin" style={{ color: 'hsla(190, 100%, 55%, 0.3)' }} />
+              <Cpu className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ color: 'hsl(190 80% 55%)' }} />
             </div>
-            <div className="text-center">
-              <p className="text-[10px] max-w-[300px] leading-relaxed" style={{ color: 'hsl(210 15% 50%)', fontFamily: 'var(--font-mono)' }}>
-                {loadProgress}
-              </p>
-            </div>
+            <p className="text-[9px] max-w-[280px] leading-relaxed text-center" style={{ color: 'hsl(210 15% 45%)', fontFamily: 'var(--font-mono)' }}>
+              {loadProgress}
+            </p>
           </div>
         )}
 
-        {/* Empty state */}
+        {/* Ready state */}
         {isLoaded && messages.length === 0 && !isLoading && (
-          <div className="flex flex-col items-center justify-center h-full py-8 gap-3">
-            <Sparkles className="w-6 h-6" style={{ color: 'hsl(190 80% 50%)' }} />
-            <div className="text-center">
-              <p className="text-xs font-medium" style={{ color: 'hsl(210 15% 55%)' }}>Neural is ready!</p>
-              <p className="text-[10px] mt-1" style={{ color: 'hsl(210 15% 35%)' }}>
-                Say hello, ask anything, or upload an image 👋
-              </p>
-            </div>
+          <div className="flex flex-col items-center justify-center h-full py-8 gap-2">
+            <Sparkles className="w-5 h-5" style={{ color: 'hsl(190 70% 50%)' }} />
+            <p className="text-[11px] font-medium" style={{ color: 'hsl(190 40% 55%)' }}>Neural is ready</p>
+            <p className="text-[9px]" style={{ color: 'hsl(210 15% 35%)', fontFamily: 'var(--font-mono)' }}>
+              TYPE A MESSAGE TO BEGIN
+            </p>
           </div>
         )}
 
@@ -277,25 +331,25 @@ function ChatBox({
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
-              className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed"
+              className="max-w-[85%] px-3 py-2 text-[11px] leading-relaxed"
               style={
                 msg.role === 'user'
                   ? {
-                      background: 'linear-gradient(135deg, hsla(190, 100%, 55%, 0.12), hsla(190, 100%, 55%, 0.06))',
-                      border: '1px solid hsla(190, 100%, 55%, 0.2)',
-                      color: 'hsl(190 80% 80%)',
-                      borderBottomRightRadius: '6px',
+                      background: 'hsla(190, 100%, 55%, 0.08)',
+                      border: '1px solid hsla(190, 100%, 55%, 0.15)',
+                      borderRadius: '12px 12px 4px 12px',
+                      color: 'hsl(190 60% 75%)',
                     }
                   : {
-                      background: 'hsla(220, 25%, 13%, 0.7)',
-                      border: '1px solid hsla(210, 20%, 22%, 0.4)',
-                      color: 'hsl(210 15% 78%)',
-                      borderBottomLeftRadius: '6px',
+                      background: 'hsla(215, 25%, 12%, 0.6)',
+                      border: '1px solid hsla(210, 20%, 20%, 0.3)',
+                      borderRadius: '12px 12px 12px 4px',
+                      color: 'hsl(210 12% 75%)',
                     }
               }
             >
               {msg.role === 'assistant' ? (
-                <div className="prose prose-sm prose-invert max-w-none [&>*]:m-0 [&>*]:text-xs [&>p]:leading-relaxed [&_code]:text-[10px] [&_code]:bg-white/5 [&_code]:px-1 [&_code]:rounded">
+                <div className="prose prose-sm prose-invert max-w-none [&>*]:m-0 [&>*]:text-[11px] [&>p]:leading-relaxed [&_code]:text-[9px] [&_code]:bg-white/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_strong]:text-[hsl(190_60%_65%)]">
                   <ReactMarkdown>{msg.content || '...'}</ReactMarkdown>
                 </div>
               ) : (
@@ -307,109 +361,122 @@ function ChatBox({
 
         {/* Typing indicator */}
         {isGenerating && messages[messages.length - 1]?.role === 'assistant' && (
-          <div className="flex items-center gap-1.5 pl-1">
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                className="w-1.5 h-1.5 rounded-full animate-bounce"
-                style={{
-                  background: 'hsl(190 100% 55%)',
-                  animationDelay: `${i * 150}ms`,
-                  animationDuration: '600ms',
-                }}
-              />
-            ))}
+          <div className="flex items-center gap-1 pl-1">
+            <div className="flex gap-1">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="w-1 h-1 rounded-full"
+                  style={{
+                    background: 'hsl(190 100% 55%)',
+                    animation: `pulse 1s ease-in-out ${i * 0.15}s infinite`,
+                  }}
+                />
+              ))}
+            </div>
           </div>
         )}
 
-        {/* TTS speaking indicator */}
+        {/* Speaking indicator */}
         {ttsSpeaking && (
-          <div className="flex items-center gap-2 pl-1">
-            <Volume2 className="w-3 h-3 animate-pulse" style={{ color: 'hsl(190 100% 55%)' }} />
-            <span className="text-[9px]" style={{ color: 'hsl(190 60% 50%)', fontFamily: 'var(--font-mono)' }}>Speaking...</span>
+          <div className="flex items-center gap-1.5 pl-1">
+            <div className="flex items-end gap-[2px]">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="w-[3px] rounded-full"
+                  style={{
+                    background: 'hsl(190 100% 55%)',
+                    height: `${6 + Math.sin(Date.now() / 200 + i) * 4}px`,
+                    animation: `pulse 0.5s ease-in-out ${i * 0.1}s infinite alternate`,
+                  }}
+                />
+              ))}
+            </div>
+            <span className="text-[8px] tracking-wider" style={{ color: 'hsl(190 50% 45%)', fontFamily: 'var(--font-mono)' }}>
+              SPEAKING
+            </span>
           </div>
         )}
       </div>
 
       {/* Image preview */}
       {imagePreview && (
-        <div className="px-4 py-2 shrink-0" style={{ borderTop: '1px solid hsla(190, 60%, 30%, 0.1)' }}>
+        <div className="px-3 py-2 shrink-0" style={{ borderTop: '1px solid hsla(190, 80%, 35%, 0.08)' }}>
           <div className="relative inline-block">
-            <img src={imagePreview} alt="Upload preview" className="h-16 rounded-lg object-cover" style={{ border: '1px solid hsla(190, 60%, 30%, 0.2)' }} />
+            <img src={imagePreview} alt="Upload" className="h-14 rounded-md object-cover" style={{ border: '1px solid hsla(190, 60%, 30%, 0.2)' }} />
             <button
               onClick={() => setImagePreview(null)}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
-              style={{ background: 'hsl(0 70% 50%)', color: 'white' }}
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
+              style={{ background: 'hsl(0 60% 45%)', color: 'white' }}
             >
-              <X className="w-3 h-3" />
+              <X className="w-2.5 h-2.5" />
             </button>
           </div>
-          <p className="text-[9px] mt-1" style={{ color: 'hsl(30 80% 55%)' }}>
-            ⚠ Image context not yet supported by browser LLMs
-          </p>
         </div>
       )}
 
-      {/* Input */}
-      <form onSubmit={handleSubmit} className="px-3 py-3 shrink-0" style={{ borderTop: '1px solid hsla(190, 60%, 30%, 0.1)' }}>
+      {/* Input bar */}
+      <form
+        onSubmit={handleSubmit}
+        className="px-3 py-2.5 shrink-0"
+        style={{ borderTop: '1px solid hsla(190, 80%, 35%, 0.08)' }}
+      >
         <div
-          className="flex items-center gap-2 px-3 py-2 rounded-xl"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
           style={{
-            background: 'hsla(220, 25%, 12%, 0.6)',
-            border: '1px solid hsla(190, 60%, 30%, 0.12)',
+            background: 'hsla(215, 25%, 10%, 0.5)',
+            border: '1px solid hsla(190, 70%, 35%, 0.1)',
           }}
         >
-          {/* Image upload */}
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={!isLoaded}
-            className="p-1 rounded transition-colors disabled:opacity-20 hover:bg-white/5"
-            style={{ color: 'hsl(210 15% 45%)' }}
-            title="Upload image"
+            className="p-1 rounded transition-colors disabled:opacity-15 hover:bg-white/5"
+            style={{ color: 'hsl(210 15% 38%)' }}
+            title="Attach image"
           >
-            <Image className="w-4 h-4" />
+            <Image className="w-3.5 h-3.5" />
           </button>
 
-          {/* Text input */}
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={isLoaded ? 'Message Neural...' : 'Load a model first...'}
+            placeholder={isLoaded ? 'Message Neural...' : 'Load model first...'}
             disabled={!isLoaded || isGenerating}
-            className="flex-1 bg-transparent text-xs outline-none placeholder:opacity-30 disabled:opacity-30"
-            style={{ color: 'hsl(210 15% 80%)', fontFamily: 'var(--font-mono)' }}
+            className="flex-1 bg-transparent text-[11px] outline-none placeholder:opacity-25 disabled:opacity-20"
+            style={{ color: 'hsl(210 12% 75%)', fontFamily: 'var(--font-mono)' }}
           />
 
-          {/* Voice input */}
           <button
             type="button"
             onClick={handleVoiceInput}
             disabled={!isLoaded}
-            className="p-1 rounded transition-all disabled:opacity-20"
+            className="p-1 rounded transition-all disabled:opacity-15"
             style={{
-              color: isRecording ? 'hsl(340 80% 55%)' : 'hsl(210 15% 45%)',
+              color: isRecording ? 'hsl(340 80% 55%)' : 'hsl(210 15% 38%)',
               background: isRecording ? 'hsla(340, 80%, 55%, 0.1)' : 'transparent',
             }}
-            title={isRecording ? 'Stop recording' : 'Voice input'}
+            title={isRecording ? 'Stop' : 'Voice input'}
           >
-            {isRecording ? <MicOff className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4" />}
+            {isRecording ? <MicOff className="w-3.5 h-3.5 animate-pulse" /> : <Mic className="w-3.5 h-3.5" />}
           </button>
 
-          {/* Send */}
           <button
             type="submit"
             disabled={!input.trim() || isGenerating || !isLoaded}
-            className="p-1.5 rounded-lg transition-all disabled:opacity-15"
+            className="p-1.5 rounded-md transition-all disabled:opacity-10"
             style={{
-              background: input.trim() ? 'hsla(190, 100%, 55%, 0.15)' : 'transparent',
-              color: 'hsl(190 100% 55%)',
+              background: input.trim() ? 'hsla(190, 100%, 55%, 0.12)' : 'transparent',
+              border: input.trim() ? '1px solid hsla(190, 100%, 55%, 0.2)' : '1px solid transparent',
+              color: 'hsl(190 90% 55%)',
             }}
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-3.5 h-3.5" />
           </button>
         </div>
       </form>
