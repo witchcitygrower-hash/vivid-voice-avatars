@@ -4,7 +4,7 @@ import { useChatHistory } from '@/hooks/useChatHistory';
 import { useAvatarAnimations, detectAction, type AvatarAction } from '@/hooks/useAvatarAnimations';
 import SVGAvatar from '@/components/SVGAvatar';
 import ChatBox from '@/components/ChatBox';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { Plus, MessageSquare, Trash2, Cpu, Volume2 } from 'lucide-react';
 import type { AudioData } from '@/hooks/useAudioAnalyzer';
 
@@ -27,6 +27,7 @@ const Index = () => {
   const wasGeneratingRef = useRef(false);
   const actionCooldownRef = useRef(0);
   const ttsInitStarted = useRef(false);
+  const [pendingReveal, setPendingReveal] = useState(false); // true = hiding last assistant msg while TTS synthesizes
 
   // Pre-load Kokoro TTS immediately
   useEffect(() => {
@@ -74,7 +75,7 @@ const Index = () => {
     return performanceActions[Math.floor(Math.random() * performanceActions.length)];
   }, []);
 
-  // When generation finishes, synthesize TTS and trigger animation only when audio starts playing
+  // When generation finishes, hide text, synthesize TTS, then reveal text + animation together
   useEffect(() => {
     if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
@@ -84,14 +85,31 @@ const Index = () => {
         const actionFromAssistant = detectActionRobust(lastMsg.content);
         const action = actionFromUser || actionFromAssistant || pickAmbientAction();
 
-        // Pass callback — animation fires exactly when audio playback begins
+        // Hide the assistant message while TTS synthesizes
+        setPendingReveal(true);
+
         tts.speak(lastMsg.content, () => {
+          // Audio is now playing — reveal text and trigger animation simultaneously
+          setPendingReveal(false);
           triggerActionSafely(action);
         });
       }
     }
     wasGeneratingRef.current = isGenerating;
   }, [isGenerating, messages, tts.speak, detectActionRobust, pickAmbientAction, triggerActionSafely]);
+
+  // Compute visible messages: hide streaming assistant text AND pending reveal
+  const visibleMessages = useMemo(() => {
+    // While generating, hide the streaming assistant placeholder
+    if (isGenerating && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant') {
+      return messages.slice(0, -1);
+    }
+    // While TTS is synthesizing, hide the completed assistant message
+    if (pendingReveal && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant') {
+      return messages.slice(0, -1);
+    }
+    return messages;
+  }, [messages, isGenerating, pendingReveal]);
 
   const handleSend = useCallback((text: string) => {
     if (!history.activeSessionId) {
@@ -317,8 +335,8 @@ const Index = () => {
           isLoaded={isLoaded}
           isLoading={isLoading}
           loadProgress={loadProgress}
-          isGenerating={isGenerating}
-          messages={messages}
+          isGenerating={isGenerating || pendingReveal}
+          messages={visibleMessages}
           currentModelId={currentModelId}
           ttsEnabled={tts.ttsEnabled}
           ttsLoading={tts.isLoading}
