@@ -290,45 +290,44 @@ function ChatBox({
       >
         {/* Model Picker */}
         {showModelSelection && (
-          <div className="flex items-center justify-center h-full">
-            <div className="flex flex-col gap-4 max-w-md w-full">
+          <div className="flex flex-col items-center justify-start pt-6 sm:justify-center sm:pt-0 h-full">
+            <div className="flex flex-col gap-3 sm:gap-4 max-w-md w-full px-2">
               <div className="text-center">
                 {wantsModelSwitch && (
                   <button
                     onClick={() => setWantsModelSwitch(false)}
-                    className="text-xs text-muted-foreground hover:text-foreground mb-3 transition-colors"
+                    className="text-xs text-muted-foreground hover:text-foreground mb-2 transition-colors"
                     style={mono}
                   >
                     ← Back to chat
                   </button>
                 )}
-                <div className="w-14 h-14 mx-auto mb-3 rounded-xl flex items-center justify-center" style={{
+                <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 sm:mb-3 rounded-xl flex items-center justify-center" style={{
                   background: 'linear-gradient(135deg, hsla(190, 100%, 55%, 0.06), hsla(220, 60%, 30%, 0.06))',
                   border: '1px solid hsla(190, 80%, 40%, 0.12)',
                 }}>
-                  <Cpu className="w-7 h-7 text-primary" style={{ filter: 'drop-shadow(0 0 6px hsla(190, 100%, 55%, 0.4))' }} />
+                  <Cpu className="w-6 h-6 sm:w-7 sm:h-7 text-primary" style={{ filter: 'drop-shadow(0 0 6px hsla(190, 100%, 55%, 0.4))' }} />
                 </div>
-                <p className="text-base font-medium tracking-wide text-primary">
+                <p className="text-sm sm:text-base font-medium tracking-wide text-primary">
                   {wantsModelSwitch ? 'Switch AI Model' : 'Select AI Model'}
                 </p>
-                <p className="text-xs mt-1 tracking-wider text-muted-foreground" style={mono}>
+                <p className="text-[10px] sm:text-xs mt-1 tracking-wider text-muted-foreground" style={mono}>
                   IN-BROWSER • WEBGPU • 100% PRIVATE
                 </p>
                 {/* Feature highlights */}
                 {!wantsModelSwitch && (
-                  <div className="flex items-center justify-center gap-3 mt-3">
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-2 sm:mt-3">
                     {[
-                      { icon: MessageCircle, label: 'Text Chat', hsl: '190 100% 55%' },
-                      { icon: Mic, label: 'Voice Input', hsl: '190 100% 55%' },
-                      { icon: Volume2, label: 'Voice Output', hsl: '160 90% 50%' },
+                      { icon: MessageCircle, label: 'Chat', hsl: '190 100% 55%' },
+                      { icon: Mic, label: 'Voice', hsl: '190 100% 55%' },
+                      { icon: Volume2, label: 'TTS', hsl: '160 90% 50%' },
                       { icon: Sparkles, label: 'Private', hsl: '45 100% 55%' },
                     ].map(({ icon: Icon, label, hsl }) => (
                       <span key={label} className="inline-flex items-center gap-1 rounded-full" style={{
-                        padding: '2px 8px', background: `hsla(${hsl} / 0.08)`, border: `1px solid hsla(${hsl} / 0.25)`,
-                        boxShadow: `0 0 10px hsla(${hsl} / 0.15), inset 0 0 8px hsla(${hsl} / 0.05)`,
-                        color: `hsl(${hsl})`, fontSize: '10px', letterSpacing: '0.05em', ...mono,
+                        padding: '2px 6px', background: `hsla(${hsl} / 0.08)`, border: `1px solid hsla(${hsl} / 0.25)`,
+                        color: `hsl(${hsl})`, fontSize: '9px', letterSpacing: '0.05em', ...mono,
                       }}>
-                        <Icon style={{ width: 12, height: 12, filter: `drop-shadow(0 0 3px hsla(${hsl} / 0.4))` }} />
+                        <Icon style={{ width: 10, height: 10 }} />
                         <span>{label}</span>
                       </span>
                     ))}
