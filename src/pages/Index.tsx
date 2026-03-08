@@ -1,6 +1,7 @@
 import { useWebLLM } from '@/hooks/useWebLLM';
 import { useKokoroTTS } from '@/hooks/useKokoroTTS';
 import { useChatHistory } from '@/hooks/useChatHistory';
+import { useAvatarAnimations, detectAction } from '@/hooks/useAvatarAnimations';
 import SVGAvatar from '@/components/SVGAvatar';
 import ChatBox from '@/components/ChatBox';
 import { useEffect, useRef, useCallback } from 'react';
@@ -15,6 +16,7 @@ const Index = () => {
   const { isLoaded, isLoading, loadProgress, isGenerating, messages, currentModelId, lastStats, settings, initEngine, sendMessage, clearMessages, setMessages, updateSettings } = useWebLLM();
   const tts = useKokoroTTS();
   const history = useChatHistory();
+  const avatar = useAvatarAnimations();
   const wasGeneratingRef = useRef(false);
   const ttsInitStarted = useRef(false);
 
@@ -33,16 +35,22 @@ const Index = () => {
     }
   }, [messages, currentModelId]);
 
-  // Auto-speak when assistant message finishes
+  // Auto-speak and detect actions when assistant message finishes
   useEffect(() => {
     if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === 'assistant' && lastMsg.content) {
         tts.speak(lastMsg.content);
+        // Check for action triggers in both user message and assistant response
+        const userMsg = messages[messages.length - 2];
+        const actionFromUser = userMsg ? detectAction(userMsg.content) : null;
+        const actionFromAssistant = detectAction(lastMsg.content);
+        const action = actionFromUser || actionFromAssistant;
+        if (action) avatar.triggerAction(action);
       }
     }
     wasGeneratingRef.current = isGenerating;
-  }, [isGenerating, messages, tts.speak]);
+  }, [isGenerating, messages, tts.speak, avatar.triggerAction]);
 
   const handleSend = useCallback((text: string) => {
     if (!history.activeSessionId) {
@@ -101,7 +109,7 @@ const Index = () => {
               boxShadow: '0 0 40px hsla(190, 100%, 50%, 0.06)',
             }}
           >
-            <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} />
+            <SVGAvatar audioData={activeAudioData} isListening={tts.isSpeaking} action={avatar.currentAction} actionProgress={avatar.animProgress} />
 
             {/* Status dot */}
             <div className="absolute bottom-2 left-2 flex items-center gap-1.5" style={mono}>
