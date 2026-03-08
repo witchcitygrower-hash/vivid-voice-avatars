@@ -29,11 +29,11 @@ function AvatarHead({ audioData, isListening }: Props) {
   }), []);
 
   const lightGrayMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(0.7, 0.72, 0.76),
-    roughness: 0.3,
-    metalness: 0.3,
-    clearcoat: 0.4,
-    envMapIntensity: 1.5,
+    color: new THREE.Color(0.45, 0.47, 0.52),
+    roughness: 0.4,
+    metalness: 0.5,
+    clearcoat: 0.5,
+    envMapIntensity: 1,
   }), []);
 
   const darkPlateMat = useMemo(() => new THREE.MeshPhysicalMaterial({
