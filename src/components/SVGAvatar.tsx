@@ -16,15 +16,20 @@ function SVGAvatar({ audioData, isListening, action = 'idle', actionProgress = 0
   const smoothed = useRef({ volume: 0, bass: 0, mid: 0, treble: 0 });
 
   useEffect(() => {
-    const tick = () => {
-      const t = (Date.now() - startRef.current) / 1000;
-      setTime(t);
-      const sm = smoothed.current;
-      const lerp = 0.12;
-      sm.volume += (audioData.volume - sm.volume) * lerp;
-      sm.bass += (audioData.bass - sm.bass) * lerp;
-      sm.mid += (audioData.mid - sm.mid) * lerp;
-      sm.treble += (audioData.treble - sm.treble) * lerp;
+    let lastUpdate = 0;
+    const tick = (now: number) => {
+      // Throttle to ~30fps to prevent page freezes
+      if (now - lastUpdate >= 33) {
+        lastUpdate = now;
+        const t = (Date.now() - startRef.current) / 1000;
+        setTime(t);
+        const sm = smoothed.current;
+        const lerp = 0.12;
+        sm.volume += (audioData.volume - sm.volume) * lerp;
+        sm.bass += (audioData.bass - sm.bass) * lerp;
+        sm.mid += (audioData.mid - sm.mid) * lerp;
+        sm.treble += (audioData.treble - sm.treble) * lerp;
+      }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
