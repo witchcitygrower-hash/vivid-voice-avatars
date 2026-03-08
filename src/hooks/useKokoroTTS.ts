@@ -19,7 +19,6 @@ export function useKokoroTTS() {
   const isSpeakingRef = useRef(false);
   const ttsEnabledRef = useRef(true);
   const isLoadingRef = useRef(false);
-  const isWarmedUp = useRef(false);
 
   const initTTS = useCallback(async () => {
     if (ttsRef.current || isLoadingRef.current) return;
@@ -37,20 +36,18 @@ export function useKokoroTTS() {
       );
       ttsRef.current = tts;
       setIsLoaded(true);
-      setLoadProgress('Warming up...');
-      console.log('[TTS] Model loaded, warming up...');
-
-      // Warm up: first inference is always slow due to ONNX graph compilation
-      // Do it now with a tiny string so real usage is fast
-      try {
-        await tts.generate('Hello.', { voice: 'af_heart' });
-        isWarmedUp.current = true;
-        console.log('[TTS] Warm-up complete!');
-      } catch (e) {
-        console.warn('[TTS] Warm-up failed:', e);
-      }
-
       setLoadProgress('');
+      console.log('[TTS] Model loaded and ready!');
+
+      // Warm up in background after a short delay so UI stays responsive
+      setTimeout(async () => {
+        try {
+          await tts.generate('Hi.', { voice: 'af_heart' });
+          console.log('[TTS] Background warm-up complete');
+        } catch (e) {
+          console.warn('[TTS] Warm-up failed:', e);
+        }
+      }, 2000);
     } catch (e) {
       console.error('[TTS] Failed to load Kokoro:', e);
       setLoadProgress(`TTS Error: ${e instanceof Error ? e.message : 'Failed to load'}`);
@@ -106,7 +103,6 @@ export function useKokoroTTS() {
     setAudioData(EMPTY_AUDIO);
   }, []);
 
-  // Browser fallback TTS with simulated mouth
   const speakFallback = useCallback((text: string) => {
     if (!window.speechSynthesis) return;
     console.log('[TTS] Using browser speechSynthesis fallback');
@@ -140,7 +136,6 @@ export function useKokoroTTS() {
     window.speechSynthesis.speak(utterance);
   }, [resetState]);
 
-  // Play audio buffer with analyzer for mouth sync
   const playAudio = useCallback((samples: Float32Array, sampleRate: number) => {
     const ctx = audioContextRef.current ?? new AudioContext();
     audioContextRef.current = ctx;
@@ -189,11 +184,11 @@ export function useKokoroTTS() {
     setIsSpeaking(true);
 
     // Yield to the event loop so UI updates before heavy inference
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 16));
 
     try {
-      // Truncate very long text to avoid extremely long generation
-      const truncated = text.length > 500 ? text.substring(0, 500) + '...' : text;
+      // Truncate to keep generation fast - 300 chars is ~20s of speech
+      const truncated = text.length > 300 ? text.substring(0, 300) + '...' : text;
 
       const rawAudio = await ttsRef.current.generate(truncated, { voice: 'af_heart' });
 
