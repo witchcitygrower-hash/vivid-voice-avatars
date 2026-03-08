@@ -4,7 +4,7 @@ import { useChatHistory } from '@/hooks/useChatHistory';
 import { useAvatarAnimations, detectAction, type AvatarAction } from '@/hooks/useAvatarAnimations';
 import SVGAvatar from '@/components/SVGAvatar';
 import ChatBox from '@/components/ChatBox';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { Plus, MessageSquare, Trash2, Cpu, Volume2 } from 'lucide-react';
 import type { AudioData } from '@/hooks/useAudioAnalyzer';
 
