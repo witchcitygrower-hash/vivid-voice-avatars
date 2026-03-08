@@ -35,16 +35,22 @@ const Index = () => {
     }
   }, [messages, currentModelId]);
 
-  // Auto-speak when assistant message finishes
+  // Auto-speak and detect actions when assistant message finishes
   useEffect(() => {
     if (wasGeneratingRef.current && !isGenerating) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === 'assistant' && lastMsg.content) {
         tts.speak(lastMsg.content);
+        // Check for action triggers in both user message and assistant response
+        const userMsg = messages[messages.length - 2];
+        const actionFromUser = userMsg ? detectAction(userMsg.content) : null;
+        const actionFromAssistant = detectAction(lastMsg.content);
+        const action = actionFromUser || actionFromAssistant;
+        if (action) avatar.triggerAction(action);
       }
     }
     wasGeneratingRef.current = isGenerating;
-  }, [isGenerating, messages, tts.speak]);
+  }, [isGenerating, messages, tts.speak, avatar.triggerAction]);
 
   const handleSend = useCallback((text: string) => {
     if (!history.activeSessionId) {
