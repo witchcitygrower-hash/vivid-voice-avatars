@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/vivid-voice-avatars/",
+  base: "/tts/",
   server: {
     host: "::",
     port: 8080,
